@@ -1,23 +1,40 @@
-//
-// Created by entropy on 9/18/18.
-//
+/*
+** EPITECH PROJECT, 2018
+** CPP_babel_2018
+** File description:
+** Server.cpp
+*/
 
-#include "Server.h"
+#include "Server.hpp"
 
-Server::Server(boost::asio::io_service &io_service,
-                       const tcp::endpoint &endpoint)
-        : _acceptor(io_service, endpoint),
-          _socket(io_service) {
-    do_accept();
+Server::Server(unsigned short port) : _io_context(), _acceptor(_io_context, tcp::endpoint(tcp::v4(), port))
+{
+	startAccept();
 }
 
-void Server::do_accept() {
-    _acceptor.async_accept(_socket,
-                           [this](boost::system::error_code ec) {
-                               if (!ec) {
-                                   User(std::move(_socket)).start(&_room);
-                               }
+Server::~Server() = default;
 
-                               do_accept();
-                           });
+void Server::run()
+{
+	_io_context.run();
+}
+
+void Server::startAccept()
+{
+	Connection::pointer new_connection =
+		Connection::create(_acceptor.get_executor().context());
+
+	_acceptor.async_accept(new_connection->socket(),
+		boost::bind(&Server::handleAccept, this, new_connection,
+			boost::asio::placeholders::error));
+}
+
+void Server::handleAccept(Connection::pointer new_connection,
+	const boost::system::error_code &error
+)
+{
+	if (!error)
+		new_connection->start();
+
+	startAccept();
 }
