@@ -1,40 +1,35 @@
-/*
-** EPITECH PROJECT, 2018
-** CPP_babel_2018
-** File description:
-** Server.cpp
-*/
+//
+// Created by entropy on 9/18/18.
+//
 
-#include "Server.hpp"
+#include "Server.h"
 
-Server::Server(unsigned short port) : _io_context(), _acceptor(_io_context, tcp::endpoint(tcp::v4(), port))
+Server::Server(unsigned short port)
+    : _io_context(), _endpoint(tcp::endpoint(tcp::v4(), port)), _acceptor(_io_context, _endpoint), _user()
 {
-	startAccept();
+    startAccept();
 }
-
-Server::~Server() = default;
 
 void Server::run()
 {
-	_io_context.run();
+    _io_context.run();
 }
 
 void Server::startAccept()
 {
-	Connection::pointer new_connection =
-		Connection::create(_acceptor.get_executor().context());
+    Session::SessionPointer session =
+            Session::create(_acceptor.get_executor().context(), _user);
 
-	_acceptor.async_accept(new_connection->socket(),
-		boost::bind(&Server::handleAccept, this, new_connection,
-			boost::asio::placeholders::error));
+    _acceptor.async_accept(session->getSocket(),
+                           boost::bind(&Server::handleAccept, this, session,
+                                       boost::asio::placeholders::error));
 }
 
-void Server::handleAccept(Connection::pointer new_connection,
-	const boost::system::error_code &error
-)
+void Server::handleAccept(Session::SessionPointer session,
+                          const boost::system::error_code &error)
 {
-	if (!error)
-		new_connection->start();
+    if (!error)
+        session->start();
 
-	startAccept();
+    startAccept();
 }
