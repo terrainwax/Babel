@@ -14,7 +14,7 @@
 
 using boost::asio::ip::tcp;
 
-typedef std::deque<Packet> Message_queue;
+typedef std::deque<Packet> PacketQueue;
 
 class Client {
 public:
@@ -40,7 +40,7 @@ private:
     boost::asio::io_service &_io_context;
     tcp::socket _socket;
     Packet _readMsg;
-    Message_queue _writeMsgQ;
+    PacketQueue _writeMsgQ;
 };
 
 #endif //CPP_BABEL_2018_CLIENT_H

@@ -8,14 +8,14 @@
 #include <iostream>
 #include "Session.h"
 
-Session::Session(boost::asio::io_context &io_context, User &user) : _socket(io_context), _user(user)
+Session::Session(Server &server, boost::asio::io_context &io_context) : _server(server),_socket(io_context), _user(nullptr)
 {
 
 }
 
-Session::SessionPointer Session::create(boost::asio::io_context &io_context, User &user)
+Session::SessionPointer Session::create(Server &server, boost::asio::io_context &io_context)
 {
-	return SessionPointer(new Session(io_context, user));
+	return SessionPointer(new Session(server, io_context));
 }
 
 tcp::socket &Session::getSocket()
@@ -23,9 +23,24 @@ tcp::socket &Session::getSocket()
 	return _socket;
 }
 
+std::string Session::getAddress()
+{
+	return _socket.remote_endpoint().address().to_string();
+}
+
 void Session::start() {
-	_user.addSession(shared_from_this());
 	startReadHeader();
+}
+
+bool Session::hasUser()
+{
+	return _user != nullptr;
+}
+
+void Session::setUser(User *user)
+{
+	_user = user;
+	_user->addSession(shared_from_this());
 }
 
 void Session::startReadHeader()
@@ -41,7 +56,8 @@ void Session::handleReadHeader(const boost::system::error_code &error, size_t by
 	if (!error && _readMsg.decodeHeader()) {
 		startReadBody();
 	} else {
-		_user.removeSession(shared_from_this());
+		if (hasUser())
+			_user->removeSession(shared_from_this());
 	}
 }
 
@@ -56,19 +72,24 @@ void Session::startReadBody()
 void Session::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
 	if (!error) {
-		_user.transmit(shared_from_this(), _readMsg);
+		if (hasUser())
+			_user->transmit(Message(_readMsg));
+		else
+			_server.broadcast(Message(_readMsg));
 		//if (_readMsg.str().substr(0, 5) == "NAME:")
-			//_name = _readMsg.str().substr(5, _readMsg.bodyLength() - 5);
+			//_user.setName(_readMsg.str().substr(5, _readMsg.bodyLength() - 5));
+		//else
 		startReadHeader();
 	} else {
-		_user.removeSession(shared_from_this());
+		if (hasUser())
+			_user->removeSession(shared_from_this());
 	}
 }
 
 void Session::startWrite()
 {
-	auto _message = std::string(_writeMsgQ.front().data(),
-								_writeMsgQ.front().length());
+	auto _message = std::string(_writeMessageQueue.front().data(),
+								_writeMessageQueue.front().length());
 
 	boost::asio::async_write(_socket, boost::asio::buffer(_message),
 		boost::bind(&Session::handleWrite, shared_from_this(),
@@ -78,22 +99,21 @@ void Session::startWrite()
 
 void Session::handleWrite(const boost::system::error_code &error, size_t bytes)
 {
-	std::cout << "Written to someone" << std::endl;
-
 	if (!error) {
-		_writeMsgQ.pop_front();
-		if (!_writeMsgQ.empty()) {
+		_writeMessageQueue.pop_front();
+		if (!_writeMessageQueue.empty()) {
 			startWrite();
 		}
 	} else {
-		_user.removeSession(shared_from_this());
+		if (hasUser())
+			_user->removeSession(shared_from_this());
 	}
 }
 
 void Session::deliver(const Packet &msg)
 {
-	bool write_in_progress = !_writeMsgQ.empty();
-	_writeMsgQ.push_back(msg);
+	bool write_in_progress = !_writeMessageQueue.empty();
+	_writeMessageQueue.push_back(msg);
 
 	if (!write_in_progress) {
 		startWrite();

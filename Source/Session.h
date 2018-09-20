@@ -8,6 +8,8 @@
 #ifndef CPP_BABEL_2018_CONNECTION_HPP
 #define CPP_BABEL_2018_CONNECTION_HPP
 
+#include <deque>
+#include <string>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
@@ -15,6 +17,8 @@
 #include "Packet.h"
 
 using boost::asio::ip::tcp;
+
+class Server;
 class User;
 
 class Session : public boost::enable_shared_from_this<Session>
@@ -22,14 +26,17 @@ class Session : public boost::enable_shared_from_this<Session>
 public:
 	typedef boost::shared_ptr<Session> SessionPointer;
 
-	static SessionPointer create(boost::asio::io_context& io_context, User &user);
+	static SessionPointer create(Server &_server, boost::asio::io_context& io_context);
 	tcp::socket& getSocket();
 	void start();
 	void deliver(const Packet &msg);
+	bool hasUser();
+	void setUser(User *user);
+	std::string getAddress();
 
 private:
 
-	explicit Session(boost::asio::io_context& io_context, User &user);
+	explicit Session(Server &_server, boost::asio::io_context& io_context);
 	void startWrite();
 	void handleWrite(const boost::system::error_code &error, size_t bytes);
 	void startReadHeader();
@@ -37,12 +44,14 @@ private:
 	void startReadBody();
 	void handleReadBody(const boost::system::error_code &error, size_t bytes);
 
+	Server &_server;
 	tcp::socket _socket;
-	User &_user;
 	Packet _readMsg;
-	Message_queue _writeMsgQ;
+	PacketQueue _writeMessageQueue;
+	User *_user;
 };
 
+#include "Server.h"
 #include "User.h"
 
 #endif //CPP_BABEL_2018_CONNECTION_HPP

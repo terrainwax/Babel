@@ -4,11 +4,22 @@
 
 #include "User.h"
 
+User::User()
+    : _name("Unknown")
+{
+
+}
+
+void User::setName(const std::string &name)
+{
+    _name = name;
+}
+
 void User::addSession(SessionPointer session) {
     std::cout << "Session added." << std::endl;
     _sessions.insert(session);
-    for (auto msg: _recentMsgQ)
-        session->deliver(msg);
+    for (auto message: _recentMessageQueue)
+        session->deliver(message.getPacket());
 }
 
 void User::removeSession(SessionPointer session) {
@@ -16,12 +27,12 @@ void User::removeSession(SessionPointer session) {
     _sessions.erase(session);
 }
 
-void User::transmit(SessionPointer session, const Packet &msg) {
-    std::cout << "Transmitting: " << std::string(msg.body(), msg.bodyLength()) << std::endl;
-    _recentMsgQ.push_back(msg);
-    while (_recentMsgQ.size() > max_recent_msgs)
-        _recentMsgQ.pop_front();
+void User::transmit(const Message &message) {
+    _recentMessageQueue.push_back(message);
+
+    while (_recentMessageQueue.size() > max_recent_messages)
+        _recentMessageQueue.pop_front();
 
     for (auto session: _sessions)
-        session->deliver(msg);
+        session->deliver(message.getPacket());
 }

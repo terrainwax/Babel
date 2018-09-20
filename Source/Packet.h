@@ -47,6 +47,6 @@ private:
     std::size_t body_length_;
 };
 
-typedef std::deque<Packet> Message_queue;
+typedef std::deque<Packet> PacketQueue;
 
 #endif //CPP_BABEL_2018_CHAT_H

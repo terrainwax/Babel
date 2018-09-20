@@ -5,7 +5,7 @@
 #include "Server.h"
 
 Server::Server(unsigned short port)
-    : _io_context(), _endpoint(tcp::endpoint(tcp::v4(), port)), _acceptor(_io_context, _endpoint), _user()
+    : _io_context(), _endpoint(tcp::endpoint(tcp::v4(), port)), _acceptor(_io_context, _endpoint)
 {
     startAccept();
 }
@@ -15,10 +15,18 @@ void Server::run()
     _io_context.run();
 }
 
+void Server::broadcast(Message message)
+{
+    std::cout << "Broadcasting message: " << message << std::endl;
+
+    for (auto session: _sessions)
+        session->deliver(message.getPacket());
+}
+
 void Server::startAccept()
 {
     Session::SessionPointer session =
-            Session::create(_acceptor.get_executor().context(), _user);
+            Session::create(*this, _acceptor.get_executor().context());
 
     _acceptor.async_accept(session->getSocket(),
                            boost::bind(&Server::handleAccept, this, session,
@@ -28,8 +36,11 @@ void Server::startAccept()
 void Server::handleAccept(Session::SessionPointer session,
                           const boost::system::error_code &error)
 {
-    if (!error)
+    if (!error) {
+        std::cout << "Session created with: " << session->getAddress() << std::endl;
+        _sessions.insert(session);
         session->start();
+    }
 
     startAccept();
 }

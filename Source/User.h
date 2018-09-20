@@ -8,31 +8,37 @@
 #include <set>
 #include <string>
 #include <iostream>
+#include <deque>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include "Packet.h"
 
 class Session;
 typedef boost::shared_ptr<Session> SessionPointer;
 
+class Message;
+typedef std::deque<Message> MessageQueue;
+
 class User {
 
 public:
+    User();
+
+    void setName(const std::string &name);
     void addSession(SessionPointer session);
     void removeSession(SessionPointer session);
-    void transmit(SessionPointer participant, const Packet &msg);
+    void transmit(const Message &message);
 
 private:
     std::set<SessionPointer> _sessions;
     enum {
-        max_recent_msgs = 100
+        max_recent_messages = 100
     };
-    Message_queue _recentMsgQ;
+    MessageQueue _recentMessageQueue;
 
     std::string _name;
-    std::string _address;
 };
 
 #include "Session.h"
+#include "Message.h"
 
 #endif //CPP_BABEL_2018_USER_H
