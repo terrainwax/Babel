@@ -4,15 +4,27 @@
 
 #include "User.h"
 
-User::User()
-    : _name("Unknown")
+User::User(Server &server, const std::string &name)
+    : _server(server), _name(name)
 {
 
 }
 
+User::UserPointer User::create(Server &server, const std::string &name)
+{
+    return UserPointer(new User(server, name));
+}
+
 void User::setName(const std::string &name)
 {
+    std::cout << "User '" << _name << "' changed his name for '" << name << "'" << std::endl;
+
     _name = name;
+}
+
+std::string User::getName()
+{
+    return _name;
 }
 
 void User::addSession(SessionPointer session) {

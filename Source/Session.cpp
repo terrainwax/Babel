@@ -72,13 +72,20 @@ void Session::startReadBody()
 void Session::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
 	if (!error) {
-		if (hasUser())
-			_user->transmit(Message(_readMsg));
-		else
+
+		if (_readMsg.str().substr(0, 5) == "NAME:") {
+			std::string name = _readMsg.str().substr(5, _readMsg.bodyLength() - 5);
+
+			if (hasUser())
+				_user->setName(name);
+			else {
+				if (_server.getUser(name) == nullptr)
+					_user = _server.newUser(name);
+			}
+		}
+		else {
 			_server.broadcast(Message(_readMsg));
-		//if (_readMsg.str().substr(0, 5) == "NAME:")
-			//_user.setName(_readMsg.str().substr(5, _readMsg.bodyLength() - 5));
-		//else
+		}
 		startReadHeader();
 	} else {
 		if (hasUser())

@@ -23,6 +23,25 @@ void Server::broadcast(Message message)
         session->deliver(message.getPacket());
 }
 
+User *Server::getUser(const std::string &name) {
+    for (auto user: _users)
+    {
+        if (user->getName() == name)
+            return user.get();
+    }
+
+    return nullptr;
+}
+
+User *Server::newUser(const std::string &name) {
+    std::cout << "New user logged in: " << name << std::endl;
+
+    UserPointer user = User::create(*this, name);
+    _users.insert(user);
+
+    return user.get();
+}
+
 void Server::startAccept()
 {
     Session::SessionPointer session =
