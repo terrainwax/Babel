@@ -5,8 +5,8 @@
 #include "Message.h"
 
 
-Message::Message(Packet packet)
-    : _packet(packet), _sender(nullptr)
+Message::Message(Packet packet, Session *sender)
+    : _packet(packet), _sender(sender)
 {
 
 }
@@ -16,13 +16,22 @@ Packet Message::getPacket() const
     return _packet;
 }
 
-Session *Message::getSender()
+bool Message::hasSender() const
+{
+    return _sender != nullptr;
+}
+
+Session *Message::getSender() const
 {
     return _sender;
 }
 
 std::ostream& operator<<(std::ostream& os, const Message& message)
 {
-    os << std::string(message.getPacket().body(), message.getPacket().bodyLength());
+    os << "'" << std::string(message.getPacket().body(), message.getPacket().bodyLength()) << "'";
+
+    if (message.hasSender())
+        os << " from " << *message.getSender();
+
     return os;
 }

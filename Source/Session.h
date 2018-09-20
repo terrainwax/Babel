@@ -30,9 +30,10 @@ public:
 	tcp::socket& getSocket();
 	void start();
 	void deliver(const Packet &msg);
-	bool hasUser();
+	bool hasUser() const;
 	void setUser(User *user);
-	std::string getAddress();
+	User *getUser() const;
+	std::string getAddress() const;
 
 private:
 
@@ -50,6 +51,8 @@ private:
 	PacketQueue _writeMessageQueue;
 	User *_user;
 };
+
+std::ostream& operator<<(std::ostream& os, const Session& session);
 
 #include "Server.h"
 #include "User.h"

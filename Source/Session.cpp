@@ -23,7 +23,7 @@ tcp::socket &Session::getSocket()
 	return _socket;
 }
 
-std::string Session::getAddress()
+std::string Session::getAddress() const
 {
 	return _socket.remote_endpoint().address().to_string();
 }
@@ -32,15 +32,21 @@ void Session::start() {
 	startReadHeader();
 }
 
-bool Session::hasUser()
+bool Session::hasUser() const
 {
 	return _user != nullptr;
 }
 
 void Session::setUser(User *user)
 {
+	std::cout << "Session from " << getAddress() << " now belongs to user " << user->getName() << std::endl;
 	_user = user;
 	_user->addSession(shared_from_this());
+}
+
+User *Session::getUser() const
+{
+	return _user;
 }
 
 void Session::startReadHeader()
@@ -80,11 +86,11 @@ void Session::handleReadBody(const boost::system::error_code &error, size_t byte
 				_user->setName(name);
 			else {
 				if (_server.getUser(name) == nullptr)
-					_user = _server.newUser(name);
+					setUser(_server.newUser(name));
 			}
 		}
 		else {
-			_server.broadcast(Message(_readMsg));
+			_server.broadcast(Message(_readMsg, this));
 		}
 		startReadHeader();
 	} else {
@@ -125,4 +131,14 @@ void Session::deliver(const Packet &msg)
 	if (!write_in_progress) {
 		startWrite();
 	}
+}
+
+std::ostream& operator<<(std::ostream& os, const Session& session)
+{
+	os << session.getAddress();
+
+	if (session.hasUser())
+		os << "(" << session.getUser()->getName() << ")";
+
+	return os;
 }

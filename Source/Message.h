@@ -11,10 +11,11 @@ class Session;
 
 class Message {
 public:
-    Message(Packet packer);
+    Message(Packet packer, Session *sender);
 
     Packet getPacket() const;
-    Session *getSender();
+    Session *getSender() const;
+    bool hasSender() const;
 
 private:
     Packet _packet;

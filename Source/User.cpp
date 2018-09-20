@@ -28,14 +28,12 @@ std::string User::getName()
 }
 
 void User::addSession(SessionPointer session) {
-    std::cout << "Session added." << std::endl;
     _sessions.insert(session);
     for (auto message: _recentMessageQueue)
         session->deliver(message.getPacket());
 }
 
 void User::removeSession(SessionPointer session) {
-    std::cout << "Session removed." << std::endl;
     _sessions.erase(session);
 }
 
