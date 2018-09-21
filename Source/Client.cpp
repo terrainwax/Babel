@@ -4,21 +4,18 @@
 
 #include "Client.h"
 
-Client::Client(const std::string &username,
-                    const std::string &password,
-                       const std::string &address,
+Client::Client(const std::string &address,
                        unsigned short port)
-        : _username(username),
-        _password(password),
-        _io_context(),
+        : _io_context(),
           _endpoint(boost::asio::ip::address::from_string(address), port)
           {
 
     startConnect();
 }
 
-void Client::run()
+void Client::start()
 {
+    std::cout << "Client started." << std::endl;
     _mainThread = std::thread([this]() { _io_context.run(); });
 }
 
@@ -35,9 +32,8 @@ void Client::handleConnect(ClientSession::SessionPointer session,
                           const boost::system::error_code &error)
 {
     if (!error) {
-        std::cout << "ClientSession created with: " << session->getAddress() << std::endl;
         _sessions.insert(session);
-        session->start();
+        session->open();
     }
 }
 
@@ -51,8 +47,8 @@ void Client::write(const Packet &msg) {
         session->deliver(msg);
 }
 
-void Client::close() {
-    //_io_context.post([this]() { _socket.close(); });
+void Client::stop() {
+    //_io_context.post([this]() { _socket.stop(); });
     _mainThread.join();
 }
 

@@ -10,9 +10,15 @@ Server::Server(unsigned short port)
     startAccept();
 }
 
-void Server::run()
+void Server::start()
 {
-    _io_context.run();
+    std::cout << "Server started." << std::endl;
+    _mainThread = std::thread([this]() { _io_context.run(); });
+}
+
+void Server::stop() {
+    //_io_context.post([this]() { _socket.stop(); });
+    _mainThread.join();
 }
 
 void Server::broadcast(Message message)
@@ -56,9 +62,8 @@ void Server::handleAccept(ServerSession::SessionPointer session,
                           const boost::system::error_code &error)
 {
     if (!error) {
-        std::cout << "ServerSession created with: " << session->getAddress() << std::endl;
         _sessions.insert(session);
-        session->start();
+        session->open();
     }
 
     startAccept();

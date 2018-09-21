@@ -29,7 +29,8 @@ std::string ClientSession::getAddress() const
     return _socket.remote_endpoint().address().to_string();
 }
 
-void ClientSession::start() {
+void ClientSession::open() {
+    std::cout << "ClientSession opened: " << getAddress() << std::endl;
     startReadHeader();
 }
 
@@ -48,7 +49,7 @@ void ClientSession::handleReadHeader(const boost::system::error_code &error, siz
     } else {
         //if (hasUser())
             //_user->removeSession(shared_from_this());
-        //_socket.close();
+        //_socket.stop();
     }
 }
 

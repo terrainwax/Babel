@@ -22,16 +22,14 @@ class Message;
 
 class Client {
 public:
-    Client(const std::string &username,
-            const std::string &password,
-            const std::string &address,
+    Client(const std::string &address,
             unsigned short port);
 
-    void run();
+    void start();
     void write(const Packet &msg);
     void display(Message message);
 
-    void close();
+    void stop();
 
 private:
     void startConnect();
@@ -39,8 +37,6 @@ private:
                                const boost::system::error_code &error);
 
 private:
-    std::string _username;
-    std::string _password;
     std::set<ClientSessionPointer> _sessions;
     boost::asio::io_context _io_context;
     tcp::endpoint _endpoint;

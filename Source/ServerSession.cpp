@@ -28,7 +28,8 @@ std::string ServerSession::getAddress() const
 	return _socket.remote_endpoint().address().to_string();
 }
 
-void ServerSession::start() {
+void ServerSession::open() {
+	std::cout << "ServerSession opened: " << getAddress() << std::endl;
 	startReadHeader();
 }
 

@@ -14,9 +14,15 @@
 int main_client(int argc, char *argv[]) {
     try {
         if (argc != 3) {
-            std::cerr << "Usage: Chat -c <host> <port>\n";
+            std::cerr << "Usage: ChatClient -client <address> <port>\n";
             return 1;
         }
+
+        Client client(argv[1], std::atoi(argv[2]));
+
+        client.start();
+
+        sleep(1);
 
         std::cout << "Username: ";
         std::string username;
@@ -42,10 +48,6 @@ int main_client(int argc, char *argv[]) {
             return 1;
         }
 
-        Client c(username, password, argv[1], std::atoi(argv[2]));
-
-        c.run();
-
         Packet nameMsg;
         nameMsg.bodyLength(username.size() + password.size() + 7);
         std::memcpy(nameMsg.body(), "LOGIN:", 6);
@@ -53,18 +55,18 @@ int main_client(int argc, char *argv[]) {
         std::memcpy(nameMsg.body() + username.size() + 6, "/", 1);
         std::memcpy(nameMsg.body() + username.size() + 7, password.data(), password.size());
         nameMsg.encodeHeader();
-        c.write(nameMsg);
+        client.write(nameMsg);
 
         char line[Packet::max_body_length + 1];
         while (std::cin.getline(line, Packet::max_body_length + 1)) {
-            Packet msg;
-            msg.bodyLength(std::strlen(line));
-            std::memcpy(msg.body(), line, msg.bodyLength());
-            msg.encodeHeader();
-            c.write(msg);
+            Packet packet;
+            packet.bodyLength(std::strlen(line));
+            std::memcpy(packet.body(), line, packet.bodyLength());
+            packet.encodeHeader();
+            client.write(packet);
         }
 
-        c.close();
+        client.stop();
     }
     catch (std::exception &e) {
         std::cerr << "Exception: " << e.what() << "\n";
@@ -76,13 +78,24 @@ int main_client(int argc, char *argv[]) {
 int main_server(int argc, char *argv[]) {
     try {
         if (argc < 2) {
-            std::cerr << "Usage: Chat -s <port> [<port> ...]\n";
+            std::cerr << "Usage: ChatServer -s <port> [<port> ...]\n";
             return 1;
         }
 
         Server server(std::atoi(argv[1]));
 
-        server.run();
+        server.start();
+
+        sleep(1);
+
+        char line[Packet::max_body_length + 1];
+        while (std::cin.getline(line, Packet::max_body_length + 1)) {
+            Packet packet;
+            packet.bodyLength(std::strlen(line));
+            std::memcpy(packet.body(), line, packet.bodyLength());
+            packet.encodeHeader();
+            server.broadcast(Message(packet, nullptr));
+        }
     }
     catch (std::exception &e) {
         std::cerr << "Exception: " << e.what() << "\n";

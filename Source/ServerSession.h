@@ -29,7 +29,7 @@ public:
 
 	static SessionPointer create(Server &_server, boost::asio::io_context& io_context);
 	tcp::socket& getSocket();
-	void start();
+	void open();
 	void deliver(const Packet &msg);
 	bool hasUser() const;
 	void setUser(User *user);

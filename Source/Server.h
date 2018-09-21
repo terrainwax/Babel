@@ -6,6 +6,7 @@
 #define CPP_BABEL_2018_SERVER_H
 
 #include <set>
+#include <thread>
 #include <iostream>
 #include <boost/asio/ip/tcp.hpp>
 
@@ -23,7 +24,8 @@ class Server {
 public:
     Server(unsigned short port);
 
-    void run();
+    void start();
+    void stop();
     void broadcast(Message message);
     User *getUser(const std::string &name);
     User *newUser(const std::string &name);
@@ -38,6 +40,7 @@ private:
     boost::asio::io_context _io_context;
     tcp::endpoint _endpoint;
     tcp::acceptor _acceptor;
+    std::thread _mainThread;
 };
 
 #include "ServerSession.h"
