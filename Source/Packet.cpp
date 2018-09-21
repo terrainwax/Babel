@@ -39,7 +39,7 @@ void Packet::bodyLength(std::size_t new_length) {
 }
 
 bool Packet::decodeHeader() {
-    _body_length = _data[0];
+    _body_length = ((unsigned short *)_data)[0];
     if (_body_length > max_body_length) {
         _body_length = 0;
         return false;
@@ -48,7 +48,7 @@ bool Packet::decodeHeader() {
 }
 
 void Packet::encodeHeader() {
-    _data[0] = _body_length;
+    ((unsigned short *)_data)[0] = _body_length;
 }
 
 std::string Packet::str()

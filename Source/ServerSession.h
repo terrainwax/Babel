@@ -15,7 +15,13 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/algorithm/string.hpp>
+#include <openssl/rand.h>
+#include <openssl/evp.h>
+#include <openssl/engine.h>
+#include <openssl/pem.h>
+
 #include "Packet.h"
+
 
 using boost::asio::ip::tcp;
 
@@ -39,6 +45,8 @@ public:
 private:
 
 	explicit ServerSession(Server &_server, boost::asio::io_context& io_context);
+	void generateKeyPair();
+	void sendRSAPublicKey();
 	void startWrite();
 	void handleWrite(const boost::system::error_code &error, size_t bytes);
 	void startReadHeader();
@@ -51,6 +59,9 @@ private:
 	Packet _readMsg;
 	PacketQueue _writeMessageQueue;
 	User *_user;
+	RSA *_keypair;
+	std::string _publicKey;
+	std::string _privateKey;
 };
 
 std::ostream& operator<<(std::ostream& os, const ServerSession& session);

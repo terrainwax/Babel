@@ -14,10 +14,10 @@
 class Packet {
 public:
     enum {
-        header_length = 1
+        header_length = 2
     };
     enum {
-        max_body_length = 256
+        max_body_length = 1024
     };
 
     Packet();

@@ -22,6 +22,7 @@ int main_client(int argc, char *argv[]) {
 
         client.start();
 
+        /*
         sleep(1);
 
         std::cout << "Username: ";
@@ -55,7 +56,7 @@ int main_client(int argc, char *argv[]) {
         std::memcpy(nameMsg.body() + username.size() + 6, "/", 1);
         std::memcpy(nameMsg.body() + username.size() + 7, password.data(), password.size());
         nameMsg.encodeHeader();
-        client.write(nameMsg);
+        client.write(nameMsg);*/
 
         char line[Packet::max_body_length + 1];
         while (std::cin.getline(line, Packet::max_body_length + 1)) {
@@ -105,6 +106,8 @@ int main_server(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+    OpenSSL_add_all_algorithms();
+
     if (argc <= 1)
         std::cerr << "Usage: Chat <-c|-s> <...>\n";
     else {
