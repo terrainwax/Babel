@@ -5,9 +5,11 @@
 #include "Client.h"
 
 Client::Client(const std::string &username,
+                    const std::string &password,
                     boost::asio::io_service &io_service,
                        tcp::resolver::iterator endpoint_iterator)
         : _username(username),
+        _password(password),
         _io_context(io_service),
           _socket(io_service) {
     do_connect(endpoint_iterator);

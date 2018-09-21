@@ -33,6 +33,7 @@ public:
     void removeSession(SessionPointer session);
     void transmit(const Message &message);
     std::string getName();
+    std::string getPassword();
 
 private:
     explicit User(Server &_server, const std::string &name);
@@ -45,6 +46,7 @@ private:
 
     Server &_server;
     std::string _name;
+    std::string _password;
 };
 
 #include "Server.h"

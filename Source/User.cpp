@@ -5,7 +5,7 @@
 #include "User.h"
 
 User::User(Server &server, const std::string &name)
-    : _server(server), _name(name)
+    : _server(server), _name(name), _password("password")
 {
 
 }
@@ -25,6 +25,11 @@ void User::setName(const std::string &name)
 std::string User::getName()
 {
     return _name;
+}
+
+std::string User::getPassword()
+{
+    return _password;
 }
 
 void User::addSession(SessionPointer session) {

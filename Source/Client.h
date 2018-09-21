@@ -19,6 +19,7 @@ typedef std::deque<Packet> PacketQueue;
 class Client {
 public:
     Client(const std::string &username,
+            const std::string &password,
             boost::asio::io_service &io_service,
                tcp::resolver::iterator endpoint_iterator);
 
@@ -37,6 +38,7 @@ private:
 
 private:
     std::string _username;
+    std::string _password;
     boost::asio::io_service &_io_context;
     tcp::socket _socket;
     Packet _readMsg;

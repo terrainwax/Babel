@@ -79,14 +79,27 @@ void Session::handleReadBody(const boost::system::error_code &error, size_t byte
 {
 	if (!error) {
 
-		if (_readMsg.str().substr(0, 5) == "NAME:") {
-			std::string name = _readMsg.str().substr(5, _readMsg.bodyLength() - 5);
+		if (_readMsg.str().substr(0, 6) == "LOGIN:") {
+
+			std::string substr = _readMsg.str().substr(6, _readMsg.bodyLength() - 6);
+			std::vector<std::string> split;
+			boost::split(split, substr, [](char c){return c == '/';});
+			std::string username = split[0];
 
 			if (hasUser())
-				_user->setName(name);
+				_user->setName(username);
 			else {
-				if (_server.getUser(name) == nullptr)
-					setUser(_server.newUser(name));
+				User *user = _server.getUser(username);
+				if (_server.getUser(username) == nullptr)
+					setUser(_server.newUser(username));
+				else
+					{
+					std::string password = split[1];
+					if (user->getPassword() == password)
+						setUser(user);
+					else
+						std::cout << "Session " << *this << " failed login with username " << username << " and password " << password << std::endl;
+				}
 			}
 		}
 		else {
@@ -139,6 +152,8 @@ std::ostream& operator<<(std::ostream& os, const Session& session)
 
 	if (session.hasUser())
 		os << "(" << session.getUser()->getName() << ")";
+	else
+		os << "(Unknown)";
 
 	return os;
 }
