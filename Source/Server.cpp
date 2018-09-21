@@ -44,19 +44,19 @@ User *Server::newUser(const std::string &name) {
 
 void Server::startAccept()
 {
-    Session::SessionPointer session =
-            Session::create(*this, _acceptor.get_executor().context());
+    ServerSession::SessionPointer session =
+            ServerSession::create(*this, _acceptor.get_executor().context());
 
     _acceptor.async_accept(session->getSocket(),
                            boost::bind(&Server::handleAccept, this, session,
                                        boost::asio::placeholders::error));
 }
 
-void Server::handleAccept(Session::SessionPointer session,
+void Server::handleAccept(ServerSession::SessionPointer session,
                           const boost::system::error_code &error)
 {
     if (!error) {
-        std::cout << "Session created with: " << session->getAddress() << std::endl;
+        std::cout << "ServerSession created with: " << session->getAddress() << std::endl;
         _sessions.insert(session);
         session->start();
     }

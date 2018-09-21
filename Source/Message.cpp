@@ -5,7 +5,7 @@
 #include "Message.h"
 
 
-Message::Message(Packet packet, Session *sender)
+Message::Message(Packet packet, ServerSession *sender)
     : _packet(packet), _sender(sender)
 {
 
@@ -21,7 +21,7 @@ bool Message::hasSender() const
     return _sender != nullptr;
 }
 
-Session *Message::getSender() const
+ServerSession *Message::getSender() const
 {
     return _sender;
 }

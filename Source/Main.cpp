@@ -37,19 +37,14 @@ int main_client(int argc, char *argv[]) {
 
         std::cout << std::endl;
 
-        boost::asio::io_service io_service;
-
-        tcp::resolver resolver(io_service);
-
         if (username.size() >= 16){
             std::cerr << "Username is too long\n";
             return 1;
         }
 
-        auto endpoint_iterator = resolver.resolve({argv[1], argv[2]});
-        Client c(username, password, io_service, endpoint_iterator);
+        Client c(username, password, argv[1], std::atoi(argv[2]));
 
-        std::thread t([&io_service]() { io_service.run(); });
+        c.run();
 
         Packet nameMsg;
         nameMsg.bodyLength(username.size() + password.size() + 7);
@@ -70,7 +65,6 @@ int main_client(int argc, char *argv[]) {
         }
 
         c.close();
-        t.join();
     }
     catch (std::exception &e) {
         std::cerr << "Exception: " << e.what() << "\n";

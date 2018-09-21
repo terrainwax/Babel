@@ -32,13 +32,13 @@ std::string User::getPassword()
     return _password;
 }
 
-void User::addSession(SessionPointer session) {
+void User::addSession(ServerSessionPointer session) {
     _sessions.insert(session);
     for (auto message: _recentMessageQueue)
         session->deliver(message.getPacket());
 }
 
-void User::removeSession(SessionPointer session) {
+void User::removeSession(ServerSessionPointer session) {
     _sessions.erase(session);
 }
 

@@ -7,25 +7,25 @@
 
 #include "Packet.h"
 
-class Session;
+class ServerSession;
 
 class Message {
 public:
-    Message(Packet packer, Session *sender);
+    Message(Packet packer, ServerSession *sender);
 
     Packet getPacket() const;
-    Session *getSender() const;
+    ServerSession *getSender() const;
     bool hasSender() const;
 
 private:
     Packet _packet;
-    Session *_sender;
+    ServerSession *_sender;
 };
 
 std::ostream& operator<<(std::ostream& os, const Message& message);
 
 typedef std::deque<Message> MessageQueue;
 
-#include "Session.h"
+#include "ServerSession.h"
 
 #endif //CPP_BABEL_2018_MESSAGE_H

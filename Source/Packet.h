@@ -2,8 +2,8 @@
 // Created by entropy on 9/18/18.
 //
 
-#ifndef CPP_BABEL_2018_CHAT_H
-#define CPP_BABEL_2018_CHAT_H
+#ifndef CPP_BABEL_2018_PACKET_H
+#define CPP_BABEL_2018_PACKET_H
 
 #include <cstdio>
 #include <cstdlib>
@@ -14,10 +14,10 @@
 class Packet {
 public:
     enum {
-        header_length = 4
+        header_length = 1
     };
     enum {
-        max_body_length = 512
+        max_body_length = 256
     };
 
     Packet();
@@ -43,10 +43,10 @@ public:
     std::string str();
 
 private:
-    char data_[header_length + max_body_length];
-    std::size_t body_length_;
+    unsigned char _data[header_length + max_body_length];
+    std::size_t _body_length;
 };
 
 typedef std::deque<Packet> PacketQueue;
 
-#endif //CPP_BABEL_2018_CHAT_H
+#endif //CPP_BABEL_2018_PACKET_H

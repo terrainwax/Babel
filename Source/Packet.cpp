@@ -5,57 +5,53 @@
 #include "Packet.h"
 
 Packet::Packet()
-        : body_length_(0) {
+        : _body_length(0) {
 }
 
 const char *Packet::data() const {
-    return data_;
+    return (char *)_data;
 }
 
 char *Packet::data() {
-    return data_;
+    return (char *)_data;
 }
 
 std::size_t Packet::length() const {
-    return header_length + body_length_;
+    return header_length + _body_length;
 }
 
 const char *Packet::body() const {
-    return data_ + header_length;
+    return (char *)_data + header_length;
 }
 
 char *Packet::body() {
-    return data_ + header_length;
+    return (char *)_data + header_length;
 }
 
 std::size_t Packet::bodyLength() const {
-    return body_length_;
+    return _body_length;
 }
 
 void Packet::bodyLength(std::size_t new_length) {
-    body_length_ = new_length;
-    if (body_length_ > max_body_length)
-        body_length_ = max_body_length;
+    _body_length = new_length;
+    if (_body_length > max_body_length)
+        _body_length = max_body_length;
 }
 
 bool Packet::decodeHeader() {
-    char header[header_length + 1] = "";
-    std::strncat(header, data_, header_length);
-    body_length_ = std::atoi(header);
-    if (body_length_ > max_body_length) {
-        body_length_ = 0;
+    _body_length = _data[0];
+    if (_body_length > max_body_length) {
+        _body_length = 0;
         return false;
     }
     return true;
 }
 
 void Packet::encodeHeader() {
-    char header[header_length + 1] = "";
-    std::sprintf(header, "%4d", body_length_);
-    std::memcpy(data_, header, header_length);
+    _data[0] = _body_length;
 }
 
 std::string Packet::str()
 {
-    return std::string(data_ + header_length, bodyLength());
+    return std::string((char *)_data + header_length, bodyLength());
 }

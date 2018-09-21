@@ -2,11 +2,11 @@
 ** EPITECH PROJECT, 2018
 ** CPP_babel_2018
 ** File description:
-** Session.hpp
+** ClientSession.hpp
 */
 
-#ifndef CPP_BABEL_2018_CONNECTION_HPP
-#define CPP_BABEL_2018_CONNECTION_HPP
+#ifndef CPP_BABEL_2018_CLIENT_SESSION_HPP
+#define CPP_BABEL_2018_CLIENT_SESSION_HPP
 
 #include <deque>
 #include <string>
@@ -19,26 +19,22 @@
 
 using boost::asio::ip::tcp;
 
-class Server;
-class User;
+class Client;
 
-class Session : public boost::enable_shared_from_this<Session>
+class ClientSession : public boost::enable_shared_from_this<ClientSession>
 {
 public:
-	typedef boost::shared_ptr<Session> SessionPointer;
+	typedef boost::shared_ptr<ClientSession> SessionPointer;
 
-	static SessionPointer create(Server &_server, boost::asio::io_context& io_context);
+	static SessionPointer create(Client &_client, boost::asio::io_context& io_context);
 	tcp::socket& getSocket();
 	void start();
 	void deliver(const Packet &msg);
-	bool hasUser() const;
-	void setUser(User *user);
-	User *getUser() const;
 	std::string getAddress() const;
 
 private:
 
-	explicit Session(Server &_server, boost::asio::io_context& io_context);
+	explicit ClientSession(Client &_client, boost::asio::io_context& io_context);
 	void startWrite();
 	void handleWrite(const boost::system::error_code &error, size_t bytes);
 	void startReadHeader();
@@ -46,16 +42,15 @@ private:
 	void startReadBody();
 	void handleReadBody(const boost::system::error_code &error, size_t bytes);
 
-	Server &_server;
+	Client &_client;
 	tcp::socket _socket;
 	Packet _readMsg;
 	PacketQueue _writeMessageQueue;
-	User *_user;
 };
 
-std::ostream& operator<<(std::ostream& os, const Session& session);
+std::ostream& operator<<(std::ostream& os, const ClientSession& session);
 
-#include "Server.h"
+#include "Client.h"
 #include "User.h"
 
-#endif //CPP_BABEL_2018_CONNECTION_HPP
+#endif //CPP_BABEL_2018_CLIENT_SESSION_HPP

@@ -5,6 +5,7 @@
 #ifndef CPP_BABEL_2018_CLIENT_H
 #define CPP_BABEL_2018_CLIENT_H
 
+#include <set>
 #include <cstdlib>
 #include <deque>
 #include <iostream>
@@ -14,35 +15,39 @@
 
 using boost::asio::ip::tcp;
 
-typedef std::deque<Packet> PacketQueue;
+class ClientSession;
+typedef boost::shared_ptr<ClientSession> ClientSessionPointer;
+
+class Message;
 
 class Client {
 public:
     Client(const std::string &username,
             const std::string &password,
-            boost::asio::io_service &io_service,
-               tcp::resolver::iterator endpoint_iterator);
+            const std::string &address,
+            unsigned short port);
 
+    void run();
     void write(const Packet &msg);
+    void display(Message message);
 
     void close();
 
 private:
-    void do_connect(tcp::resolver::iterator endpoint_iterator);
-
-    void do_read_header();
-
-    void do_read_body();
-
-    void do_write();
+    void startConnect();
+    void handleConnect(ClientSessionPointer session,
+                               const boost::system::error_code &error);
 
 private:
     std::string _username;
     std::string _password;
-    boost::asio::io_service &_io_context;
-    tcp::socket _socket;
-    Packet _readMsg;
-    PacketQueue _writeMsgQ;
+    std::set<ClientSessionPointer> _sessions;
+    boost::asio::io_context _io_context;
+    tcp::endpoint _endpoint;
+    std::thread _mainThread;
 };
+
+#include "ClientSession.h"
+#include "Message.h"
 
 #endif //CPP_BABEL_2018_CLIENT_H

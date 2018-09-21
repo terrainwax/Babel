@@ -6,77 +6,54 @@
 
 Client::Client(const std::string &username,
                     const std::string &password,
-                    boost::asio::io_service &io_service,
-                       tcp::resolver::iterator endpoint_iterator)
+                       const std::string &address,
+                       unsigned short port)
         : _username(username),
         _password(password),
-        _io_context(io_service),
-          _socket(io_service) {
-    do_connect(endpoint_iterator);
+        _io_context(),
+          _endpoint(boost::asio::ip::address::from_string(address), port)
+          {
+
+    startConnect();
+}
+
+void Client::run()
+{
+    _mainThread = std::thread([this]() { _io_context.run(); });
+}
+
+void Client::startConnect() {
+
+    ClientSession::SessionPointer session = ClientSession::create(*this, _io_context);
+
+    boost::asio::async_connect(session->getSocket(), &_endpoint,
+                               boost::bind(&Client::handleConnect, this, session,
+                                           boost::asio::placeholders::error));
+}
+
+void Client::handleConnect(ClientSession::SessionPointer session,
+                          const boost::system::error_code &error)
+{
+    if (!error) {
+        std::cout << "ClientSession created with: " << session->getAddress() << std::endl;
+        _sessions.insert(session);
+        session->start();
+    }
+}
+
+void Client::display(Message message)
+{
+    std::cout << "Received message: " << message << std::endl;
 }
 
 void Client::write(const Packet &msg) {
-    _io_context.post(
-            [this, msg]() {
-                bool write_in_progress = !_writeMsgQ.empty();
-                _writeMsgQ.push_back(msg);
-                if (!write_in_progress) {
-                    do_write();
-                }
-            });
+    for (auto session: _sessions)
+        session->deliver(msg);
 }
 
 void Client::close() {
-    _io_context.post([this]() { _socket.close(); });
+    //_io_context.post([this]() { _socket.close(); });
+    _mainThread.join();
 }
 
-void Client::do_connect(tcp::resolver::iterator endpoint_iterator) {
-    boost::asio::async_connect(_socket, endpoint_iterator,
-                               [this](boost::system::error_code ec, tcp::resolver::iterator) {
-                                   if (!ec) {
-                                       do_read_header();
-                                   }
-                               });
-}
 
-void Client::do_read_header() {
-    boost::asio::async_read(_socket,
-                            boost::asio::buffer(_readMsg.data(), Packet::header_length),
-                            [this](boost::system::error_code ec, std::size_t /*length*/) {
-                                if (!ec && _readMsg.decodeHeader()) {
-                                    do_read_body();
-                                } else {
-                                    _socket.close();
-                                }
-                            });
-}
-
-void Client::do_read_body() {
-    boost::asio::async_read(_socket,
-                            boost::asio::buffer(_readMsg.body(), _readMsg.bodyLength()),
-                            [this](boost::system::error_code ec, std::size_t /*length*/) {
-                                if (!ec) {
-                                    std::cout.write(_readMsg.body(), _readMsg.bodyLength());
-                                    std::cout << "\n";
-                                    do_read_header();
-                                } else {
-                                    _socket.close();
-                                }
-                            });
-}
-
-void Client::do_write() {
-    boost::asio::async_write(_socket,
-                             boost::asio::buffer(_writeMsgQ.front().data(),
-                                                 _writeMsgQ.front().length()),
-                             [this](boost::system::error_code ec, std::size_t /*length*/) {
-                                 if (!ec) {
-                                     _writeMsgQ.pop_front();
-                                     if (!_writeMsgQ.empty()) {
-                                         do_write();
-                                     }
-                                 } else {
-                                     _socket.close();
-                                 }
-                             });
-}

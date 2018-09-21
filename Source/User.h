@@ -14,8 +14,8 @@
 
 class Server;
 
-class Session;
-typedef boost::shared_ptr<Session> SessionPointer;
+class ServerSession;
+typedef boost::shared_ptr<ServerSession> ServerSessionPointer;
 
 class Message;
 typedef std::deque<Message> MessageQueue;
@@ -29,8 +29,8 @@ public:
     static UserPointer create(Server &_server, const std::string &name);
 
     void setName(const std::string &name);
-    void addSession(SessionPointer session);
-    void removeSession(SessionPointer session);
+    void addSession(ServerSessionPointer session);
+    void removeSession(ServerSessionPointer session);
     void transmit(const Message &message);
     std::string getName();
     std::string getPassword();
@@ -38,7 +38,7 @@ public:
 private:
     explicit User(Server &_server, const std::string &name);
 
-    std::set<SessionPointer> _sessions;
+    std::set<ServerSessionPointer> _sessions;
     enum {
         max_recent_messages = 100
     };
@@ -50,7 +50,7 @@ private:
 };
 
 #include "Server.h"
-#include "Session.h"
+#include "ServerSession.h"
 #include "Message.h"
 
 #endif //CPP_BABEL_2018_USER_H

@@ -11,8 +11,8 @@
 
 using boost::asio::ip::tcp;
 
-class Session;
-typedef boost::shared_ptr<Session> SessionPointer;
+class ServerSession;
+typedef boost::shared_ptr<ServerSession> ServerSessionPointer;
 
 class User;
 typedef boost::shared_ptr<User> UserPointer;
@@ -31,16 +31,16 @@ public:
 
 private:
     void startAccept();
-    void handleAccept(SessionPointer, const boost::system::error_code &error);
+    void handleAccept(ServerSessionPointer, const boost::system::error_code &error);
 
-    std::set<SessionPointer> _sessions;
+    std::set<ServerSessionPointer> _sessions;
     std::set<UserPointer> _users;
     boost::asio::io_context _io_context;
     tcp::endpoint _endpoint;
     tcp::acceptor _acceptor;
 };
 
-#include "Session.h"
+#include "ServerSession.h"
 #include "User.h"
 #include "Message.h"
 

@@ -2,62 +2,62 @@
 ** EPITECH PROJECT, 2018
 ** CPP_babel_2018
 ** File description:
-** Session.cpp
+** ServerSession.cpp
 */
 
 #include <iostream>
-#include "Session.h"
+#include "ServerSession.h"
 
-Session::Session(Server &server, boost::asio::io_context &io_context) : _server(server),_socket(io_context), _user(nullptr)
+ServerSession::ServerSession(Server &server, boost::asio::io_context &io_context) : _server(server),_socket(io_context), _user(nullptr)
 {
 
 }
 
-Session::SessionPointer Session::create(Server &server, boost::asio::io_context &io_context)
+ServerSession::SessionPointer ServerSession::create(Server &server, boost::asio::io_context &io_context)
 {
-	return SessionPointer(new Session(server, io_context));
+	return SessionPointer(new ServerSession(server, io_context));
 }
 
-tcp::socket &Session::getSocket()
+tcp::socket &ServerSession::getSocket()
 {
 	return _socket;
 }
 
-std::string Session::getAddress() const
+std::string ServerSession::getAddress() const
 {
 	return _socket.remote_endpoint().address().to_string();
 }
 
-void Session::start() {
+void ServerSession::start() {
 	startReadHeader();
 }
 
-bool Session::hasUser() const
+bool ServerSession::hasUser() const
 {
 	return _user != nullptr;
 }
 
-void Session::setUser(User *user)
+void ServerSession::setUser(User *user)
 {
-	std::cout << "Session from " << getAddress() << " now belongs to user " << user->getName() << std::endl;
+	std::cout << "ServerSession from " << getAddress() << " now belongs to user " << user->getName() << std::endl;
 	_user = user;
 	_user->addSession(shared_from_this());
 }
 
-User *Session::getUser() const
+User *ServerSession::getUser() const
 {
 	return _user;
 }
 
-void Session::startReadHeader()
+void ServerSession::startReadHeader()
 {
 	boost::asio::async_read(_socket, boost::asio::buffer(_readMsg.data(), Packet::header_length),
-							boost::bind(&Session::handleReadHeader, shared_from_this(),
+							boost::bind(&ServerSession::handleReadHeader, shared_from_this(),
 										boost::asio::placeholders::error,
 										boost::asio::placeholders::bytes_transferred));
 }
 
-void Session::handleReadHeader(const boost::system::error_code &error, size_t bytes)
+void ServerSession::handleReadHeader(const boost::system::error_code &error, size_t bytes)
 {
 	if (!error && _readMsg.decodeHeader()) {
 		startReadBody();
@@ -67,15 +67,15 @@ void Session::handleReadHeader(const boost::system::error_code &error, size_t by
 	}
 }
 
-void Session::startReadBody()
+void ServerSession::startReadBody()
 {
 	boost::asio::async_read(_socket, boost::asio::buffer(_readMsg.body(), _readMsg.bodyLength()),
-							 boost::bind(&Session::handleReadBody, shared_from_this(),
+							 boost::bind(&ServerSession::handleReadBody, shared_from_this(),
 										 boost::asio::placeholders::error,
 										 boost::asio::placeholders::bytes_transferred));
 }
 
-void Session::handleReadBody(const boost::system::error_code &error, size_t bytes)
+void ServerSession::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
 	if (!error) {
 
@@ -98,7 +98,7 @@ void Session::handleReadBody(const boost::system::error_code &error, size_t byte
 					if (user->getPassword() == password)
 						setUser(user);
 					else
-						std::cout << "Session " << *this << " failed login with username " << username << " and password " << password << std::endl;
+						std::cout << "ServerSession " << *this << " failed login with username " << username << " and password " << password << std::endl;
 				}
 			}
 		}
@@ -112,18 +112,18 @@ void Session::handleReadBody(const boost::system::error_code &error, size_t byte
 	}
 }
 
-void Session::startWrite()
+void ServerSession::startWrite()
 {
 	auto _message = std::string(_writeMessageQueue.front().data(),
 								_writeMessageQueue.front().length());
 
 	boost::asio::async_write(_socket, boost::asio::buffer(_message),
-		boost::bind(&Session::handleWrite, shared_from_this(),
+		boost::bind(&ServerSession::handleWrite, shared_from_this(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
 }
 
-void Session::handleWrite(const boost::system::error_code &error, size_t bytes)
+void ServerSession::handleWrite(const boost::system::error_code &error, size_t bytes)
 {
 	if (!error) {
 		_writeMessageQueue.pop_front();
@@ -136,7 +136,7 @@ void Session::handleWrite(const boost::system::error_code &error, size_t bytes)
 	}
 }
 
-void Session::deliver(const Packet &msg)
+void ServerSession::deliver(const Packet &msg)
 {
 	bool write_in_progress = !_writeMessageQueue.empty();
 	_writeMessageQueue.push_back(msg);
@@ -146,7 +146,7 @@ void Session::deliver(const Packet &msg)
 	}
 }
 
-std::ostream& operator<<(std::ostream& os, const Session& session)
+std::ostream& operator<<(std::ostream& os, const ServerSession& session)
 {
 	os << session.getAddress();
 
