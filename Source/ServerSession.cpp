@@ -71,11 +71,13 @@ void ServerSession::generateKeyPair()
 
 void ServerSession::sendRSAPublicKey()
 {
+	std::cout << "Sending RSA Public Key." << std::endl;
+
 	Packet packet;
 	packet.bodyLength(_publicKey.size());
 	std::memcpy(packet.body(), _publicKey.data(), packet.bodyLength());
 	packet.encodeHeader();
-	_server.broadcast(Message(packet, nullptr));
+	deliver(packet);
 }
 
 bool ServerSession::hasUser() const
