@@ -34,6 +34,8 @@ public:
     void transmit(const Message &message);
     std::string getName();
     std::string getPassword();
+    bool getStatus() const;
+    void setStatus(bool status);
 
 private:
     explicit User(Server &_server, const std::string &name);
@@ -47,6 +49,7 @@ private:
     Server &_server;
     std::string _name;
     std::string _password;
+    bool _isAvailable;
 };
 
 #include "Server.h"

@@ -5,7 +5,7 @@
 #include "User.h"
 
 User::User(Server &server, const std::string &name)
-    : _server(server), _name(name), _password("password")
+    : _server(server), _name(name), _password("password"), _isAvailable(true)
 {
 
 }
@@ -50,4 +50,14 @@ void User::transmit(const Message &message) {
 
     for (auto session: _sessions)
         session->deliver(message.getPacket());
+}
+
+bool User::getStatus() const
+{
+    return _isAvailable;
+}
+
+void User::setStatus(bool status)
+{
+	_isAvailable = status;
 }

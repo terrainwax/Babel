@@ -8,43 +8,34 @@
 #include <iostream>
 #include "CommandLexer.h"
 
-CommandLexer::CommandLexer()
+CommandLexer::CommandLexer(Server &server) : _server(server)
 {
-	_functionMap["ONLINE"] = std::bind(&CommandLexer::sendAnswer, this, "OK", std::placeholders::_1);
-	_functionMap["OFFLINE"] = std::bind(&CommandLexer::sendAnswer, this, "OK", std::placeholders::_1);
-	_functionMap["HOST"] = std::bind(&CommandLexer::sendAnswer, this, "OK", std::placeholders::_1);
-	_functionMap["CALL"] = std::bind(&CommandLexer::sendAnswer, this, "OK", std::placeholders::_1);
-	_functionMap["HANG"] = std::bind(&CommandLexer::sendAnswer, this, "OK", std::placeholders::_1);
-	_functionMap["ALIVE"] = std::bind(&CommandLexer::sendAnswer, this, "OK", std::placeholders::_1);
-	_functionMap["LIST"] = std::bind(&CommandLexer::sendAnswer, this, "OK", std::placeholders::_1);
+	_functionMap["ONLINE"] = std::bind(&CommandLexer::online, this, std::placeholders::_1, std::placeholders::_2);
+	_functionMap["OFFLINE"] = std::bind(&CommandLexer::offline, this, std::placeholders::_1, std::placeholders::_2);
+	_functionMap["HOST"] = std::bind(&CommandLexer::host, this, std::placeholders::_1, std::placeholders::_2);
+	_functionMap["CALL"] = std::bind(&CommandLexer::call, this, std::placeholders::_1, std::placeholders::_2);
+	_functionMap["HANG"] = std::bind(&CommandLexer::hang, this, std::placeholders::_1, std::placeholders::_2);
+	_functionMap["ALIVE"] = std::bind(&CommandLexer::alive, this, std::placeholders::_1, std::placeholders::_2);
+	_functionMap["LIST"] = std::bind(&CommandLexer::list, this, std::placeholders::_1, std::placeholders::_2);
 }
 
 void CommandLexer::parse(Packet &packet, ServerSession *session)
 {
 	auto rawCommand = std::string(packet.str());
 	if (rawCommand.empty())
-	{
-		sendAnswer("KO", session);
-		return;
-	}
+		ko();
 
 	auto tokens = tokenize(rawCommand);
 	auto command = *tokens.begin();
 
 	if (command.empty())
-	{
-		sendAnswer("KO", session);
-		return;
-	}
+		ko();
 
 	auto function = _functionMap[command];
 	if (function)
-		function(session);
+		function(tokens, session);
 	else
-	{
-		sendAnswer("KO", session);
-		return;
-	}
+		ko();
 }
 
 void CommandLexer::sendAnswer(std::string answer, ServerSession *session)
@@ -60,5 +51,79 @@ void CommandLexer::sendAnswer(std::string answer, ServerSession *session)
 boost::tokenizer<boost::char_separator<char>> CommandLexer::tokenize(std::string &toTokenize)
 {
 	boost::char_separator<char> separator(" \t");
-	return boost::tokenizer<boost::char_separator<char>>(toTokenize, separator);
+	return Tokens(toTokenize, separator);
+}
+
+void CommandLexer::online(CommandLexer::Tokens tokens, ServerSession *session)
+{
+	if (!session->hasUser())
+		ko();
+
+	for (auto user : _server.getOnlineUsers())
+	{
+		if (user == session->getUser())
+			ko();
+	}
+
+	_server.getOnlineUsers().emplace_back(session->getUser());
+	(void)tokens;
+}
+
+void CommandLexer::offline(CommandLexer::Tokens tokens, ServerSession *session)
+{
+	if (!session->hasUser())
+		ko();
+
+	for (auto user = _server.getOnlineUsers().begin(); user != _server.getOnlineUsers().end(); user++)
+	{
+		if (*user == session->getUser())
+		{
+			user = _server.getOnlineUsers().erase(user);
+			sendAnswer("OK", session);
+			return;
+		}
+	}
+
+	ko();
+
+	(void)tokens;
+}
+
+void CommandLexer::host(CommandLexer::Tokens tokens, ServerSession *session)
+{
+	sendAnswer("OK", session);
+	session->getUser()->setStatus(false);
+}
+
+void CommandLexer::call(CommandLexer::Tokens tokens, ServerSession *session)
+{
+	sendAnswer("OK", session);
+	session->getUser()->setStatus(false);
+}
+
+void CommandLexer::hang(CommandLexer::Tokens tokens, ServerSession *session)
+{
+	sendAnswer("OK", session);
+	session->getUser()->setStatus(true);
+}
+
+void CommandLexer::alive(CommandLexer::Tokens tokens, ServerSession *session)
+{
+	sendAnswer("OK", session);
+}
+
+void CommandLexer::list(CommandLexer::Tokens tokens, ServerSession *session)
+{
+	std::string answer("OK");
+
+	for (auto user : _server.getOnlineUsers())
+	{
+		answer.append("\n");
+		answer.append(user->getName());
+		answer.append(" ");
+		answer.append(user->getStatus() ? "available" : "busy");
+	}
+
+	answer.append("\n");
+	sendAnswer(answer, session);
 }

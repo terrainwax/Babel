@@ -4,8 +4,8 @@
 
 #include "Server.h"
 
-Server::Server(unsigned short port)
-    : _io_context(), _endpoint(tcp::endpoint(tcp::v4(), port)), _acceptor(_io_context, _endpoint)
+Server::Server(unsigned short port) : _io_context(), _endpoint(tcp::endpoint(tcp::v4(), port)),
+_acceptor(_io_context, _endpoint), _lexer(*this)
 {
     startAccept();
 }
@@ -72,4 +72,9 @@ void Server::handleAccept(ServerSession::SessionPointer session,
 CommandLexer &Server::getLexer()
 {
 	return _lexer;
+}
+
+std::vector<User *> &Server::getOnlineUsers()
+{
+	return _onlineUsers;
 }

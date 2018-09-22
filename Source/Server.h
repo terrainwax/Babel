@@ -30,6 +30,7 @@ public:
     User *getUser(const std::string &name);
     User *newUser(const std::string &name);
     CommandLexer &getLexer();
+    std::vector<User *> &getOnlineUsers();
 
 private:
     void startAccept();
@@ -42,6 +43,7 @@ private:
     tcp::acceptor _acceptor;
     std::thread _mainThread;
     CommandLexer _lexer;
+    std::vector<User *> _onlineUsers;
 };
 
 #include "ServerSession.h"

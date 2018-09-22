@@ -13,22 +13,35 @@
 #include <boost/tokenizer.hpp>
 #include "Packet.h"
 
+#define ko()	{ sendAnswer("KO", session); return; }
+
 class ServerSession;
+class Server;
 
 class CommandLexer {
 public:
-	CommandLexer();
+	CommandLexer(Server &server);
 	~CommandLexer() = default;
 
 	void parse(Packet &packet, ServerSession *session);
 private:
-	void sendAnswer(std::string answer, ServerSession *session);
-	boost::tokenizer<boost::char_separator<char>> tokenize(std::string &toTokenize);
-	void OK(ServerSession *session);
+	typedef boost::tokenizer<boost::char_separator<char>> Tokens;
 
-	std::map<std::string, std::function<void(ServerSession *)>> _functionMap;
+	void sendAnswer(std::string answer, ServerSession *session);
+	Tokens tokenize(std::string &toTokenize);
+
+	void online(Tokens tokens, ServerSession *session);
+	void offline(Tokens tokens, ServerSession *session);
+	void host(Tokens tokens, ServerSession *session);
+	void call(Tokens tokens, ServerSession *session);
+	void hang(Tokens tokens, ServerSession *session);
+	void alive(Tokens tokens, ServerSession *session);
+	void list(Tokens tokens, ServerSession *session);
+
+	Server &_server;
+	std::map<std::string, std::function<void(Tokens, ServerSession *)>> _functionMap;
 };
 
-#include "ServerSession.h"
+#include "Server.h"
 
 #endif //CPP_BABEL_2018_COMMANDLEXER_H
