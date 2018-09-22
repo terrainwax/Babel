@@ -151,7 +151,7 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 			}
 		}
 		else {
-			_server.broadcast(Message(_readMsg, this));
+			_server.getLexer().parse(_readMsg, this);
 		}
 		startReadHeader();
 	} else {

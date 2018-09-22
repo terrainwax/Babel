@@ -68,3 +68,8 @@ void Server::handleAccept(ServerSession::SessionPointer session,
 
     startAccept();
 }
+
+CommandLexer &Server::getLexer()
+{
+	return _lexer;
+}

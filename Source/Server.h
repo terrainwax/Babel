@@ -9,16 +9,16 @@
 #include <thread>
 #include <iostream>
 #include <boost/asio/ip/tcp.hpp>
+#include "CommandLexer.h"
 
 using boost::asio::ip::tcp;
 
 class ServerSession;
 typedef boost::shared_ptr<ServerSession> ServerSessionPointer;
-
 class User;
 typedef boost::shared_ptr<User> UserPointer;
-
 class Message;
+class CommandLexer;
 
 class Server {
 public:
@@ -29,7 +29,7 @@ public:
     void broadcast(Message message);
     User *getUser(const std::string &name);
     User *newUser(const std::string &name);
-
+    CommandLexer &getLexer();
 
 private:
     void startAccept();
@@ -41,6 +41,7 @@ private:
     tcp::endpoint _endpoint;
     tcp::acceptor _acceptor;
     std::thread _mainThread;
+    CommandLexer _lexer;
 };
 
 #include "ServerSession.h"

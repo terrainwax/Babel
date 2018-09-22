@@ -95,7 +95,8 @@ int main_server(int argc, char *argv[]) {
             packet.bodyLength(std::strlen(line));
             std::memcpy(packet.body(), line, packet.bodyLength());
             packet.encodeHeader();
-            server.broadcast(Message(packet, nullptr));
+            std::cout << line << std::endl;
+            //server.broadcast(Message(packet, nullptr));
         }
     }
     catch (std::exception &e) {
