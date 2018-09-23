@@ -52,6 +52,7 @@ private:
 	void handleReadHeader(const boost::system::error_code &error, size_t bytes);
 	void startReadBody();
 	void handleReadBody(const boost::system::error_code &error, size_t bytes);
+	void deliverString(std::string string);
 
 	Server &_server;
 	tcp::socket _socket;

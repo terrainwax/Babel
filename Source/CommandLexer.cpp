@@ -66,6 +66,7 @@ void CommandLexer::online(CommandLexer::Tokens tokens, ServerSession *session)
 	}
 
 	_server.getOnlineUsers().emplace_back(session->getUser());
+	sendAnswer("OK", session);
 	(void)tokens;
 }
 
@@ -85,7 +86,6 @@ void CommandLexer::offline(CommandLexer::Tokens tokens, ServerSession *session)
 	}
 
 	ko();
-
 	(void)tokens;
 }
 
@@ -118,12 +118,15 @@ void CommandLexer::list(CommandLexer::Tokens tokens, ServerSession *session)
 
 	for (auto user : _server.getOnlineUsers())
 	{
+		if (user == session->getUser())
+			continue;
 		answer.append("\n");
 		answer.append(user->getName());
 		answer.append(" ");
 		answer.append(user->getStatus() ? "available" : "busy");
 	}
 
-	answer.append("\n");
+	if (answer.size() != std::string("OK").size())
+		answer.append("\n");
 	sendAnswer(answer, session);
 }

@@ -138,15 +138,25 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 				_user->setName(username);
 			else {
 				User *user = _server.getUser(username);
-				if (_server.getUser(username) == nullptr)
+				if (_server.getUser(username) == nullptr) {
 					setUser(_server.newUser(username));
-				else
-					{
+					deliverString("OK");
+				} else {
 					std::string password = split[1];
-					if (user->getPassword() == password)
+					if (user->getPassword() == password) {
 						setUser(user);
-					else
-						std::cout << "ServerSession " << *this << " failed login with username " << username << " and password " << password << std::endl;
+						deliverString("OK");
+					}
+					else {
+						std::cout << "ServerSession "
+							<< *this
+							<< " failed login with username "
+							<< username
+							<< " and password "
+							<< password
+							<< std::endl;
+						deliverString("KO");
+					}
 				}
 			}
 		}
@@ -204,4 +214,14 @@ std::ostream& operator<<(std::ostream& os, const ServerSession& session)
 		os << "(Unknown)";
 
 	return os;
+}
+
+void ServerSession::deliverString(std::string string)
+{
+	Packet packet;
+
+	packet.bodyLength(string.size());
+	std::strcpy(packet.body(), string.c_str());
+	packet.encodeHeader();
+	deliver(packet);
 }
