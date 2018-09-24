@@ -64,6 +64,17 @@ void ClientSession::startReadBody()
 void ClientSession::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
     if (!error) {
+        if (_readMsg.str().substr(0, 30) == "-----BEGIN RSA PUBLIC KEY-----")
+        {
+            std::cout << "Received RSA Public Key From Server." << std::endl;
+
+            const std::string RSAPublicKey = _readMsg.str();
+            BIO* bo = BIO_new(BIO_s_mem());
+            BIO_write(bo, RSAPublicKey.c_str(), RSAPublicKey.length());
+            PEM_read_bio_RSA_PUBKEY(bo, &_public_key, 0, 0 );
+            BIO_free(bo);
+        }
+        else
             _client.display(Message(_readMsg, nullptr));
         startReadHeader();
     } else {
