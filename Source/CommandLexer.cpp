@@ -65,7 +65,7 @@ void CommandLexer::online(Packet &packet, ServerSession *session)
 	unsigned char id = 1;
 	for (; id < UCHAR_MAX && isTaken(id); id++);
 	if (id == UCHAR_MAX)
-	ko();
+		ko();
 
 	session->getUser()->setID(id);
 	_server.getOnlineUsers().emplace_back(session->getUser());
