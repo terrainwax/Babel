@@ -12,13 +12,13 @@ const unsigned int MAX_COMMAND_SIZE = 1024;
 
 typedef enum {
 	LOGIN = 0,
-	ONLINE,
-	OFFLINE,
-	HOST,
-	CALL,
-	HANG,
-	ALIVE,
-	LIST
+	ONLINE = 1,
+	OFFLINE = 2,
+	HOST = 3,
+	CALL = 4,
+	HANG = 5,
+	ALIVE = 6,
+	LIST = 7
 } CommandIdentifier;
 
 typedef union {
