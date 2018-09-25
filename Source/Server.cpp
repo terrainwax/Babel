@@ -40,7 +40,7 @@ User *Server::getUser(const std::string &name) {
 }
 
 User *Server::newUser(const std::string &name) {
-    std::cout << "New user logged in: " << name << std::endl;
+    std::cout << "New user : " << name << std::endl;
 
     UserPointer user = User::create(*this, name);
     _users.insert(user);

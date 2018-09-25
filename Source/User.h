@@ -23,33 +23,36 @@ typedef std::deque<Message> MessageQueue;
 class User : public boost::enable_shared_from_this<User> {
 
 public:
-    User();
-    typedef boost::shared_ptr<User> UserPointer;
+	typedef boost::shared_ptr<User> UserPointer;
 
-    static UserPointer create(Server &_server, const std::string &name);
+	static UserPointer create(Server &_server, const std::string &name);
 
-    void setName(const std::string &name);
-    void addSession(ServerSessionPointer session);
-    void removeSession(ServerSessionPointer session);
-    void transmit(const Message &message);
-    std::string getName();
-    std::string getPassword();
-    bool getStatus() const;
-    void setStatus(bool status);
+	void setName(const std::string &name);
+	void addSession(ServerSessionPointer session);
+	void removeSession(ServerSessionPointer session);
+	void transmit(const Message &message);
+	std::string getName();
+	std::string getPassword();
+	void setPassword(const std::string &password);
+	bool getStatus() const;
+	void setStatus(bool status);
+	unsigned char getID() const;
+	void setID(unsigned char id);
 
 private:
-    explicit User(Server &_server, const std::string &name);
+	explicit User(Server &_server, const std::string &name);
 
-    std::set<ServerSessionPointer> _sessions;
-    enum {
-        max_recent_messages = 100
-    };
-    MessageQueue _recentMessageQueue;
+	std::set<ServerSessionPointer> _sessions;
+	enum {
+		max_recent_messages = 100
+	};
+	MessageQueue _recentMessageQueue;
 
-    Server &_server;
-    std::string _name;
-    std::string _password;
-    bool _isAvailable;
+	Server &_server;
+	std::string _name;
+	std::string _password;
+	bool _isAvailable;
+	unsigned char _id;
 };
 
 #include "Server.h"

@@ -61,7 +61,7 @@ void ServerSession::generateKeyPair()
 
 	BIO_read(privateBIO, _privateKey.data(), pri_len);
 	BIO_read(publicBIO, _publicKey.data(), pub_len);
-	
+
 	_privateKey = _privateKey.substr(0, _privateKey.size() - 1);
 	_publicKey = _publicKey.substr(0, _publicKey.size() - 1);
 
@@ -100,9 +100,9 @@ User *ServerSession::getUser() const
 void ServerSession::startReadHeader()
 {
 	boost::asio::async_read(_socket, boost::asio::buffer(_readMsg.data(), Packet::header_length),
-							boost::bind(&ServerSession::handleReadHeader, shared_from_this(),
-										boost::asio::placeholders::error,
-										boost::asio::placeholders::bytes_transferred));
+		boost::bind(&ServerSession::handleReadHeader, shared_from_this(),
+			boost::asio::placeholders::error,
+			boost::asio::placeholders::bytes_transferred));
 }
 
 void ServerSession::handleReadHeader(const boost::system::error_code &error, size_t bytes)
@@ -118,51 +118,15 @@ void ServerSession::handleReadHeader(const boost::system::error_code &error, siz
 void ServerSession::startReadBody()
 {
 	boost::asio::async_read(_socket, boost::asio::buffer(_readMsg.body(), _readMsg.bodyLength()),
-							 boost::bind(&ServerSession::handleReadBody, shared_from_this(),
-										 boost::asio::placeholders::error,
-										 boost::asio::placeholders::bytes_transferred));
+		boost::bind(&ServerSession::handleReadBody, shared_from_this(),
+			boost::asio::placeholders::error,
+			boost::asio::placeholders::bytes_transferred));
 }
 
 void ServerSession::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
 	if (!error) {
-
-		if (_readMsg.str().substr(0, 6) == "LOGIN:") {
-
-			std::string substr = _readMsg.str().substr(6, _readMsg.bodyLength() - 6);
-			std::vector<std::string> split;
-			boost::split(split, substr, [](char c){return c == '/';});
-			std::string username = split[0];
-
-			if (hasUser())
-				_user->setName(username);
-			else {
-				User *user = _server.getUser(username);
-				if (_server.getUser(username) == nullptr) {
-					setUser(_server.newUser(username));
-					deliverString("OK");
-				} else {
-					std::string password = split[1];
-					if (user->getPassword() == password) {
-						setUser(user);
-						deliverString("OK");
-					}
-					else {
-						std::cout << "ServerSession "
-							<< *this
-							<< " failed login with username "
-							<< username
-							<< " and password "
-							<< password
-							<< std::endl;
-						deliverString("KO");
-					}
-				}
-			}
-		}
-		else {
-			_server.getLexer().parse(_readMsg, this);
-		}
+		_server.getLexer().parse(_readMsg, this);
 		startReadHeader();
 	} else {
 		if (hasUser())
@@ -173,7 +137,7 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 void ServerSession::startWrite()
 {
 	auto _message = std::string(_writeMessageQueue.front().data(),
-								_writeMessageQueue.front().length());
+		_writeMessageQueue.front().length());
 
 	boost::asio::async_write(_socket, boost::asio::buffer(_message),
 		boost::bind(&ServerSession::handleWrite, shared_from_this(),

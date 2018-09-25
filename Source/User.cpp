@@ -5,59 +5,74 @@
 #include "User.h"
 
 User::User(Server &server, const std::string &name)
-    : _server(server), _name(name), _password("password"), _isAvailable(true)
+	: _server(server), _name(name), _isAvailable(true), _id(1)
 {
 
 }
 
 User::UserPointer User::create(Server &server, const std::string &name)
 {
-    return UserPointer(new User(server, name));
+	return UserPointer(new User(server, name));
 }
 
 void User::setName(const std::string &name)
 {
-    std::cout << "User '" << _name << "' changed his name for '" << name << "'" << std::endl;
+	std::cout << "User '" << _name << "' changed his name for '" << name << "'" << std::endl;
 
-    _name = name;
+	_name = name;
 }
 
 std::string User::getName()
 {
-    return _name;
+	return _name;
 }
 
 std::string User::getPassword()
 {
-    return _password;
+	return _password;
 }
 
 void User::addSession(ServerSessionPointer session) {
-    _sessions.insert(session);
-    for (auto message: _recentMessageQueue)
-        session->deliver(message.getPacket());
+	_sessions.insert(session);
+	for (auto message: _recentMessageQueue)
+		session->deliver(message.getPacket());
 }
 
 void User::removeSession(ServerSessionPointer session) {
-    _sessions.erase(session);
+	_sessions.erase(session);
 }
 
 void User::transmit(const Message &message) {
-    _recentMessageQueue.push_back(message);
+	_recentMessageQueue.push_back(message);
 
-    while (_recentMessageQueue.size() > max_recent_messages)
-        _recentMessageQueue.pop_front();
+	while (_recentMessageQueue.size() > max_recent_messages)
+		_recentMessageQueue.pop_front();
 
-    for (auto session: _sessions)
-        session->deliver(message.getPacket());
+	for (auto session: _sessions)
+		session->deliver(message.getPacket());
 }
 
 bool User::getStatus() const
 {
-    return _isAvailable;
+	return _isAvailable;
 }
 
 void User::setStatus(bool status)
 {
 	_isAvailable = status;
+}
+
+unsigned char User::getID() const
+{
+	return _id;
+}
+
+void User::setID(unsigned char id)
+{
+	_id = id;
+}
+
+void User::setPassword(const std::string &password)
+{
+	_password = password;
 }
