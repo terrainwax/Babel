@@ -5,14 +5,14 @@
 ** Main.cpp
 */
 
+#include "Client.h"
+#include "Server.h"
+
 #ifdef BOOST_NO_EXCEPTIONS
 namespace boost {
 	void throw_exception(std::exception const &e) {}
 }
 #endif
-
-#include "Client.h"
-#include "Server.h"
 
 int main_client(int argc, char *argv[]) {
 	try {
