@@ -1,15 +1,18 @@
-#include "Client.h"
-#include "Server.h"
-
-#include <termios.h>
-#include <unistd.h>
-
 /*
 ** EPITECH PROJECT, 2018
 ** CPP_babel_2018
 ** File description:
 ** Main.cpp
 */
+
+#ifdef BOOST_NO_EXCEPTIONS
+namespace boost {
+	void throw_exception(std::exception const &e) {}
+}
+#endif
+
+#include "Client.h"
+#include "Server.h"
 
 int main_client(int argc, char *argv[]) {
 	try {
@@ -96,7 +99,7 @@ int main_server(int argc, char *argv[]) {
 
 		server.start();
 
-		sleep(1);
+		//sleep(1);
 
 		char line[Packet::max_body_length + 1];
 		while (std::cin.getline(line, Packet::max_body_length + 1)) {

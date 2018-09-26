@@ -12,12 +12,18 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
+#ifdef _WIN32
+	#include "Message.h"
+#endif
+
 class Server;
 
 class ServerSession;
 typedef boost::shared_ptr<ServerSession> ServerSessionPointer;
 
-class Message;
+#ifndef _WIN32
+	class Message;
+#endif
 typedef std::deque<Message> MessageQueue;
 
 class User : public boost::enable_shared_from_this<User> {

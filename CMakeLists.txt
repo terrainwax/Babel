@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.12)
 project(CPP_babel_2018)
 
 set(CMAKE_CXX_STANDARD 17)
+ADD_DEFINITIONS(-D_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH)
+
+if (WIN32)
+    set(CMAKE_CXX_FLAGS "/MD")
+endif()
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
