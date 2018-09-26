@@ -21,6 +21,7 @@
 #include <openssl/pem.h>
 
 #include "Packet.h"
+#include "ServerCrypto.h"
 
 using boost::asio::ip::tcp;
 
@@ -44,7 +45,6 @@ public:
 private:
 
 	explicit ServerSession(Server &_server, boost::asio::io_context& io_context);
-	void generateKeyPair();
 	void sendRSAPublicKey();
 	void startWrite();
 	void handleWrite(const boost::system::error_code &error, size_t bytes);
@@ -59,9 +59,7 @@ private:
 	Packet _readMsg;
 	PacketQueue _writeMessageQueue;
 	User *_user;
-	RSA *_keypair;
-	std::string _publicKey;
-	std::string _privateKey;
+	ServerCrypto _crypto;
 };
 
 std::ostream& operator<<(std::ostream& os, const ServerSession& session);

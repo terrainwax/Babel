@@ -8,7 +8,7 @@
 #include <iostream>
 #include "ServerSession.h"
 
-ServerSession::ServerSession(Server &server, boost::asio::io_context &io_context) : _server(server),_socket(io_context), _user(nullptr)
+ServerSession::ServerSession(Server &server, boost::asio::io_context &io_context) : _server(server),_socket(io_context), _user(nullptr), _crypto()
 {
 
 }
@@ -30,52 +30,22 @@ std::string ServerSession::getAddress() const
 
 void ServerSession::open() {
 	std::cout << "ServerSession opened: " << getAddress() << std::endl;
-	generateKeyPair();
 	sendRSAPublicKey();
 	//receiveAESKey();
 	startReadHeader();
-}
-
-void ServerSession::generateKeyPair()
-{
-	std::cout << "Generating RSA KeyPair" << std::endl;
-
-	RAND_load_file("/dev/urandom", 1024);
-
-	_keypair = RSA_generate_key(2048, RSA_F4, NULL, NULL);
-
-	if (RSA_check_key(_keypair) != 1)
-		std::cout << "Error occured while generating RSA keypair" << std::endl;
-
-	BIO *privateBIO = BIO_new(BIO_s_mem());
-	BIO *publicBIO = BIO_new(BIO_s_mem());
-
-	PEM_write_bio_RSAPrivateKey(privateBIO, _keypair, nullptr, nullptr, 0, nullptr, nullptr);
-	PEM_write_bio_RSAPublicKey(publicBIO, _keypair);
-
-	int pri_len = BIO_pending(privateBIO);
-	int pub_len = BIO_pending(publicBIO);
-
-	_privateKey = std::string(pri_len, '\0');
-	_publicKey = std::string(pub_len, '\0');
-
-	BIO_read(privateBIO, _privateKey.data(), pri_len);
-	BIO_read(publicBIO, _publicKey.data(), pub_len);
-
-	_privateKey = _privateKey.substr(0, _privateKey.size() - 1);
-	_publicKey = _publicKey.substr(0, _publicKey.size() - 1);
-
-	BIO_free_all(publicBIO);
-	BIO_free_all(privateBIO);
 }
 
 void ServerSession::sendRSAPublicKey()
 {
 	std::cout << "Sending RSA Public Key." << std::endl;
 
+	std::string key = _crypto.getLocalPublicKey();
+
+	std::cout << "'" << key << "'" << std::endl;
+
 	Packet packet;
-	packet.bodyLength(_publicKey.size());
-	std::memcpy(packet.body(), _publicKey.data(), packet.bodyLength());
+	packet.bodyLength(key.size());
+	std::memcpy(packet.body(), key.data(), packet.bodyLength());
 	packet.encodeHeader();
 	deliver(packet);
 }

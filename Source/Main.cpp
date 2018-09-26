@@ -120,6 +120,7 @@ int main_server(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 	OpenSSL_add_all_algorithms();
+	RAND_load_file("/dev/urandom", 1024);
 
 	if (argc <= 1)
 		std::cerr << "Usage: Chat <-c|-s> <...>\n";
