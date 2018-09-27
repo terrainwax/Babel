@@ -70,6 +70,23 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
 
             const std::string RSAPublicKey = _readMsg.str();
             _crypto.setRemotePublicKey(RSAPublicKey);
+
+            /*
+            std::string encryptionKey;
+            std::string encryptionIv;
+
+            std::string encryptedAESKey = _crypto.encryptRSA(_crypto.getAESKey(), encryptionKey, encryptionIv);
+
+            deliver(encryptionKey);
+            deliver(encryptionIv);
+            deliver(encryptedAESKey);
+
+            std::string encryptedAESIv = _crypto.encryptRSA(_crypto.getAESIv(), encryptionKey, encryptionIv);
+
+            deliver(encryptionKey);
+            deliver(encryptionIv);
+            deliver(encryptedAESIv);
+            */
         }
         _client.display(Message(_readMsg, nullptr));
         startReadHeader();
@@ -103,10 +120,15 @@ void ClientSession::handleWrite(const boost::system::error_code &error, size_t b
     }
 }
 
-void ClientSession::deliver(const Packet &msg)
+void ClientSession::deliver(const std::string &message)
 {
+    Packet packet;
+    packet.bodyLength(message.size());
+    std::memcpy(packet.body(), message.data(), packet.bodyLength());
+    packet.encodeHeader();
+
     bool write_in_progress = !_writeMessageQueue.empty();
-    _writeMessageQueue.push_back(msg);
+    _writeMessageQueue.push_back(packet);
 
     if (!write_in_progress) {
         startWrite();

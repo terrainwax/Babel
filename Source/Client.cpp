@@ -49,9 +49,9 @@ void Client::display(Message message)
 	std::cout << "Received message: " << message << std::endl;
 }
 
-void Client::write(const Packet &msg) {
+void Client::write(const std::string &message) {
 	for (auto session: _sessions)
-		session->deliver(msg);
+		session->deliver(message);
 }
 
 void Client::stop() {

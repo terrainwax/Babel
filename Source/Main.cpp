@@ -72,11 +72,7 @@ int main_client(int argc, char *argv[]) {
 			line = line.substr(static_cast<unsigned long>(indexChar));
 			std::memcpy((char *)command.data.data + sizeof(CommandIdentifier), line.c_str(), line.size());
 
-			Packet packet;
-			packet.bodyLength(sizeof(Command));
-			std::memcpy(packet.body(), &command, packet.bodyLength());
-			packet.encodeHeader();
-			client.write(packet);
+			client.write(std::string((char *)&command, sizeof(Command)));
 		}
 
 		client.stop();

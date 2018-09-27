@@ -15,10 +15,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/algorithm/string.hpp>
-#include <openssl/rand.h>
-#include <openssl/evp.h>
-#include <openssl/engine.h>
-#include <openssl/pem.h>
 
 #include "Packet.h"
 #include "ServerCrypto.h"

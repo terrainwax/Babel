@@ -15,10 +15,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/algorithm/string.hpp>
-#include <openssl/rand.h>
-#include <openssl/evp.h>
-#include <openssl/engine.h>
-#include <openssl/pem.h>
 
 #include "Packet.h"
 #include "ClientCrypto.h"
@@ -35,7 +31,7 @@ public:
 	static SessionPointer create(Client &_client, boost::asio::io_context& io_context);
 	tcp::socket& getSocket();
 	void open();
-	void deliver(const Packet &msg);
+	void deliver(const std::string &message);
 	std::string getAddress() const;
 
 private:

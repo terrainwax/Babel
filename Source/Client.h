@@ -26,7 +26,7 @@ public:
             unsigned short port);
 
     void start();
-    void write(const Packet &msg);
+    void write(const std::string &message);
     void display(Message message);
 
     void stop();
