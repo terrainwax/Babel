@@ -20,9 +20,6 @@ ServerCrypto::~ServerCrypto()
 
 	EVP_CIPHER_CTX_free(_decryptContextRSA);
 	EVP_CIPHER_CTX_free(_decryptContextAES);
-
-	free(_aesKey);
-	free(_aesIv);
 }
 
 int ServerCrypto::init()
@@ -45,8 +42,8 @@ int ServerCrypto::init()
 		NULL, 1);
 
 	/* Now we can set key and IV lengths */
-	aesKeyLength = EVP_CIPHER_CTX_key_length(_encryptContextAES);
-	aesIvLength = EVP_CIPHER_CTX_iv_length(_encryptContextAES);
+	_aesKey = std::string('\0', EVP_CIPHER_CTX_key_length(_encryptContextAES));
+	_aesIv = std::string('\0', EVP_CIPHER_CTX_iv_length(_encryptContextAES));
 
 	// Generate RSA and AES keys
 	generateRsaKeypair(&_localKeyPairRSA);
@@ -126,7 +123,7 @@ int ServerCrypto::encryptAES(const unsigned char *message, size_t messageLength,
 
 	// Encrypt it!
 	if (!EVP_EncryptInit_ex(_encryptContextAES, EVP_aes_256_cbc(), NULL,
-		_aesKey, _aesIv))
+                            (unsigned char *)_aesKey.c_str(), (unsigned char *)_aesIv.c_str()))
 		return FAILURE;
 
 	if (!EVP_EncryptUpdate(_encryptContextAES, *encryptedMessage,
@@ -156,7 +153,7 @@ int ServerCrypto::decryptAES(unsigned char *encryptedMessage,
 
 	// Decrypt it!
 	if (!EVP_DecryptInit_ex(_decryptContextAES, EVP_aes_256_cbc(), NULL,
-		_aesKey, _aesIv))
+                            (unsigned char *)_aesKey.c_str(), (unsigned char *)_aesIv.c_str()))
 		return FAILURE;
 
 	if (!EVP_DecryptUpdate(_decryptContextAES,
@@ -205,36 +202,32 @@ std::string ServerCrypto::getLocalPrivateKey()
 	return key;
 }
 
-int ServerCrypto::getAesKey(unsigned char **aesKey)
+std::string ServerCrypto::getAESKey()
 {
-	*aesKey = this->_aesKey;
-	return aesKeyLength;
+	return _aesKey;
 }
 
-int ServerCrypto::setAesKey(unsigned char *aesKey, size_t aesKeyLengthgth)
+int ServerCrypto::setAESKey(const std::string &aesKey)
 {
-	// Ensure the new key is the proper size
-	if (aesKeyLengthgth != aesKeyLength)
+	if (_aesKey.size() != aesKey.size())
 		return FAILURE;
 
-	std::memcpy(this->_aesKey, aesKey, aesKeyLength);
+	_aesKey = aesKey;
 
 	return SUCCESS;
 }
 
-int ServerCrypto::getAesIv(unsigned char **aesIv)
+std::string ServerCrypto::getAESIv()
 {
-	*aesIv = this->_aesIv;
-	return aesIvLength;
+    return _aesIv;
 }
 
-int ServerCrypto::setAesIv(unsigned char *aesIv, size_t aesIvLengthgth)
+int ServerCrypto::setAESIv(const std::string &aesIv)
 {
-	// Ensure the new IV is the proper size
-	if (aesIvLengthgth != aesIvLength)
+	if (_aesIv.size() != aesIv.size())
 		return FAILURE;
 
-	std::memcpy(this->_aesIv, aesIv, aesIvLength);
+	_aesIv = aesIv;
 
 	return SUCCESS;
 }

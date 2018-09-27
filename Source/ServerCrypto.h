@@ -38,11 +38,11 @@ class ServerCrypto {
     std::string getLocalPublicKey();
     std::string getLocalPrivateKey();
 
-    int getAesKey(unsigned char **aesKey);
-    int setAesKey(unsigned char *aesKey, size_t aesKeyLen);
+    std::string getAESKey();
+    int setAESKey(const std::string &aesKey);
 
-    int getAesIv(unsigned char **aesIv);
-    int setAesIv(unsigned char *aesIv, size_t aesIvLen);
+    std::string getAESIv();
+    int setAESIv(const std::string &aesIv);
 
   private:
     EVP_PKEY *_localKeyPairRSA;
@@ -52,11 +52,8 @@ class ServerCrypto {
     EVP_CIPHER_CTX *_encryptContextAES;
     EVP_CIPHER_CTX *_decryptContextAES;
 
-    unsigned char *_aesKey;
-    unsigned char *_aesIv;
-
-    size_t aesKeyLength;
-    size_t aesIvLength;
+    std::string _aesKey;
+    std::string _aesIv;
 
     int init();
     int generateRsaKeypair(EVP_PKEY **keypair);

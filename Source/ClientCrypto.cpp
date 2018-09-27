@@ -13,9 +13,6 @@ ClientCrypto::~ClientCrypto() {
 
     EVP_CIPHER_CTX_free(_encryptContextAES);
     EVP_CIPHER_CTX_free(_decryptContextAES);
-
-    free(_aesKey);
-    free(_aesIv);
 }
 
 int ClientCrypto::init() {
@@ -36,28 +33,18 @@ int ClientCrypto::init() {
     EVP_CipherInit_ex(_encryptContextAES, EVP_aes_256_cbc(), NULL, NULL, NULL, 1);
 
     /* Now we can set key and IV lengths */
-    aesKeyLength = EVP_CIPHER_CTX_key_length(_encryptContextAES);
-    aesIvLength = EVP_CIPHER_CTX_iv_length(_encryptContextAES);
-
-    // Generate RSA and AES keys
-    generateAesKey(&_aesKey, &_aesIv);
+    _aesKey = std::string('\0', EVP_CIPHER_CTX_key_length(_encryptContextAES));
+    _aesIv = std::string('\0', EVP_CIPHER_CTX_iv_length(_encryptContextAES));
 
     return SUCCESS;
 }
 
-int ClientCrypto::generateAesKey(unsigned char **aesKey, unsigned char **aesIv) {
-    *aesKey = (unsigned char*)malloc(aesKeyLength);
-    *aesIv = (unsigned char*)malloc(aesIvLength);
-
-    if(aesKey == NULL || aesIv == NULL) {
+int ClientCrypto::generateAesKey() {
+    if(RAND_bytes((unsigned char *)_aesKey.data(), _aesKey.size()) == 0) {
         return FAILURE;
     }
 
-    if(RAND_bytes(*aesKey, aesKeyLength) == 0) {
-        return FAILURE;
-    }
-
-    if(RAND_bytes(*aesIv, aesIvLength) == 0) {
+    if(RAND_bytes((unsigned char *)_aesIv.data(), _aesIv.size()) == 0) {
         return FAILURE;
     }
 
@@ -114,7 +101,7 @@ int ClientCrypto::encryptAES(const unsigned char *message, size_t messageLength,
     }
 
     // Encrypt it!
-    if(!EVP_EncryptInit_ex(_encryptContextAES, EVP_aes_256_cbc(), NULL, _aesKey, _aesIv)) {
+    if(!EVP_EncryptInit_ex(_encryptContextAES, EVP_aes_256_cbc(), NULL, (unsigned char *)_aesKey.c_str(), (unsigned char *)_aesIv.c_str())) {
         return FAILURE;
     }
 
@@ -142,7 +129,7 @@ int ClientCrypto::decryptAES(unsigned char *encryptedMessage, size_t encryptedMe
     }
 
     // Decrypt it!
-    if(!EVP_DecryptInit_ex(_decryptContextAES, EVP_aes_256_cbc(), NULL, _aesKey, _aesIv)) {
+    if(!EVP_DecryptInit_ex(_decryptContextAES, EVP_aes_256_cbc(), NULL, (unsigned char *)_aesKey.c_str(), (unsigned char *)_aesIv.c_str())) {
         return FAILURE;
     }
 
@@ -176,34 +163,32 @@ int ClientCrypto::setRemotePublicKey(const std::string &publicKey) {
     return SUCCESS;
 }
 
-int ClientCrypto::getAesKey(unsigned char **aesKey) {
-    *aesKey = this->_aesKey;
-    return aesKeyLength;
+std::string ClientCrypto::getAESKey()
+{
+    return _aesKey;
 }
 
-int ClientCrypto::setAesKey(unsigned char *aesKey, size_t aesKeyLengthgth) {
-    // Ensure the new key is the proper size
-    if(aesKeyLengthgth != aesKeyLength) {
+int ClientCrypto::setAESKey(const std::string &aesKey)
+{
+    if (_aesKey.size() != aesKey.size())
         return FAILURE;
-    }
 
-    std::memcpy(this->_aesKey, aesKey, aesKeyLength);
+    _aesKey = aesKey;
 
     return SUCCESS;
 }
 
-int ClientCrypto::getAesIv(unsigned char **aesIv) {
-    *aesIv = this->_aesIv;
-    return aesIvLength;
+std::string ClientCrypto::getAESIv()
+{
+    return _aesIv;
 }
 
-int ClientCrypto::setAesIv(unsigned char *aesIv, size_t aesIvLengthgth) {
-    // Ensure the new IV is the proper size
-    if(aesIvLengthgth != aesIvLength) {
+int ClientCrypto::setAESIv(const std::string &aesIv)
+{
+    if (_aesIv.size() != aesIv.size())
         return FAILURE;
-    }
 
-    std::memcpy(this->_aesIv, aesIv, aesIvLength);
+    _aesIv = aesIv;
 
     return SUCCESS;
 }
