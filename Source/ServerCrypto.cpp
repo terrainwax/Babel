@@ -19,76 +19,63 @@ ServerCrypto::~ServerCrypto()
 	EVP_CIPHER_CTX_free(_decryptContextRSA);
 }
 
-int ServerCrypto::initialize()
+void ServerCrypto::initialize()
 {
 	_decryptContextRSA = EVP_CIPHER_CTX_new();
 
-	// Check if any of the contexts initializations failed
 	if (_decryptContextRSA == NULL)
-		return FAILURE;
+		throw CryptoException("Cannot Create RSA Decryption Context");
 
-	return generateRsaKeypair();
+	generateRsaKeypair();
 }
 
-int ServerCrypto::generateRsaKeypair()
+void ServerCrypto::generateRsaKeypair()
 {
 	EVP_PKEY_CTX *context = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL);
 
 	if (EVP_PKEY_keygen_init(context) <= 0)
-		return FAILURE;
+		throw CryptoException("Cannot Generate RSA KeyPair");
 
 	if (EVP_PKEY_CTX_set_rsa_keygen_bits(context, RSA_KEYLEN) <= 0)
-		return FAILURE;
+		throw CryptoException("Cannot Generate RSA KeyPair");
 
 	if (EVP_PKEY_keygen(context, &_localKeyPairRSA) <= 0)
-		return FAILURE;
+		throw CryptoException("Cannot Generate RSA KeyPair");
 
 	EVP_PKEY_CTX_free(context);
-
-	return SUCCESS;
 }
 
-int ServerCrypto::decryptRSA(unsigned char *encryptedMessage,
-	size_t encryptedMessageLength, unsigned char *encryptedKey,
-	size_t encryptedKeyLength, unsigned char *iv, size_t ivLength,
-	unsigned char **decryptedMessage
-)
+std::string ServerCrypto::decryptRSA(const std::string &encryptedMessage, const std::string &encryptionKey, const std::string &encryptionIv)
 {
-	// Allocate memory for everything
 	size_t decryptedMessageLength = 0;
 	size_t blockLength = 0;
 
-	*decryptedMessage = (unsigned char *)malloc(
-		encryptedMessageLength + ivLength);
-	if (*decryptedMessage == NULL)
-		return FAILURE;
+	std::string decryptedMessage = std::string('\0', encryptedMessage.size() + encryptionIv.size());
 
-	EVP_PKEY *key = _localKeyPairRSA;
-
-	// Decrypt it!
-	if (!EVP_OpenInit(_decryptContextRSA, EVP_aes_256_cbc(), encryptedKey,
-		encryptedKeyLength, iv, key))
-		return FAILURE;
+	if (!EVP_OpenInit(_decryptContextRSA, EVP_aes_256_cbc(), (unsigned char *)encryptionKey.data(),
+		encryptionKey.size(), (unsigned char *)encryptionIv.data(), _localKeyPairRSA))
+		throw CryptoException("Cannot Initialize RSA Decryption");
 
 	if (!EVP_OpenUpdate(_decryptContextRSA,
-		(unsigned char *)*decryptedMessage + decryptedMessageLength,
-		(int *)&blockLength, encryptedMessage,
-		(int)encryptedMessageLength))
-		return FAILURE;
+		(unsigned char *)decryptedMessage.data() + decryptedMessageLength,
+		(int *)&blockLength, (unsigned char *)encryptedMessage.c_str(),
+		(int)encryptedMessage.size()))
+		throw CryptoException("Cannot Update RSA Decryption");
+
 	decryptedMessageLength += blockLength;
 
 	if (!EVP_OpenFinal(_decryptContextRSA,
-		(unsigned char *)*decryptedMessage + decryptedMessageLength,
+		(unsigned char *)decryptedMessage.data() + decryptedMessageLength,
 		(int *)&blockLength))
-		return FAILURE;
+		throw CryptoException("Cannot Finalize RSA Decryption");
+
 	decryptedMessageLength += blockLength;
 
-	return (int)decryptedMessageLength;
+	return decryptedMessage.substr(0, decryptedMessageLength);
 }
 
 std::string ServerCrypto::getLocalPublicKey()
 {
-
 	BIO *bio = BIO_new(BIO_s_mem());
 
 	PEM_write_bio_PUBKEY(bio, _localKeyPairRSA);

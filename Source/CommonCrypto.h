@@ -5,7 +5,6 @@
 #ifndef CPP_BABEL_2018_COMMON_CRYPTO_H
 #define CPP_BABEL_2018_COMMON_CRYPTO_H
 
-
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/aes.h>
@@ -16,24 +15,23 @@
 #include <string>
 #include <cstring>
 
-#define RSA_KEYLEN 2048
+#include "CryptoException.h"
 
-#define SUCCESS 0
-#define FAILURE -1
+#define RSA_KEYLEN 2048
 
 class CommonCrypto {
 public:
     CommonCrypto();
     ~CommonCrypto();
 
-    int encryptAES(const unsigned char *message, size_t messageLength, unsigned char **encryptedMessage);
-    int decryptAES(unsigned char *encryptedMessage, size_t encryptedMessageLength, unsigned char **decryptedMessage);
+    std::string encryptAES(const std::string &message);
+    std::string decryptAES(const std::string &encryptedMessage);
 
     std::string getAESKey();
-    int setAESKey(const std::string &aesKey);
+    void setAESKey(const std::string &aesKey);
 
     std::string getAESIv();
-    int setAESIv(const std::string &aesIv);
+    void setAESIv(const std::string &aesIv);
 
 protected:
     std::string _aesKey;
@@ -43,7 +41,7 @@ private:
     EVP_CIPHER_CTX *_encryptContextAES;
     EVP_CIPHER_CTX *_decryptContextAES;
 
-    int initialize();
+    void initialize();
 };
 
 

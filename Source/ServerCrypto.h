@@ -15,9 +15,7 @@ class ServerCrypto: public CommonCrypto {
     ServerCrypto();
     ~ServerCrypto();
 
-    int decryptRSA(unsigned char *encryptedMessage, size_t encryptedMessageLength, unsigned char *encryptedKey,
-                   size_t encryptedKeyLength,
-                   unsigned char *iv, size_t ivLength, unsigned char **decryptedMessage);
+    std::string decryptRSA(const std::string &encryptedMessage, const std::string &encryptionKey, const std::string &encryptionIv);
 
     std::string getLocalPublicKey();
     std::string getLocalPrivateKey();
@@ -27,8 +25,8 @@ class ServerCrypto: public CommonCrypto {
 
     EVP_CIPHER_CTX *_decryptContextRSA;
 
-    int initialize();
-    int generateRsaKeypair();
+    void initialize();
+    void generateRsaKeypair();
 };
 
 #endif

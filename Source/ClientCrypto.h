@@ -8,21 +8,18 @@ public:
     ClientCrypto();
     ~ClientCrypto();
 
-    int encryptRSA(const unsigned char *message, size_t messageLength, unsigned char **encryptedMessage,
-                   unsigned char **encryptedKey,
-                   size_t *encryptedKeyLength, unsigned char **iv, size_t *ivLength);
+    std::string encryptRSA(const std::string &message, std::string &encryptionKey, std::string &encryptionIv);
 
     std::string getRemotePublicKey();
-    int setRemotePublicKey(const std::string &publicKey);
-
-    int generateAesKey();
+    void setRemotePublicKey(const std::string &publicKey);
 
 private:
     EVP_PKEY *_remotePublicKeyRSA;
 
     EVP_CIPHER_CTX *_encryptContextRSA;
 
-    int initialize();
+    void initialize();
+    void generateAesKey();
 };
 
 #endif
