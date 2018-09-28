@@ -136,16 +136,17 @@ char* BabelString::end() const
     return &_data[_size - 1];
 }
 
+BabelString::BabelString(const BabelString &babelString)
+{
+    _data = static_cast<char *>(std::malloc(babelString.getSize() + 1));
+    _size = babelString.getSize();
+
+    std::memcpy(_data, babelString.getData(), _size);
+    _data[_size] = '\0';
+}
+
 std::ostream& operator<<(std::ostream& os, const BabelString &string)
 {
-    /*
-    for (size_t x = 0; x < string.getSize(); x++)
-    {
-        if (std::isprint(string.getData()[x]))
-            os << string.getData()[x];
-    }
-    */
-
     os << string.getData();
 
     return os;

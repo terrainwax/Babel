@@ -38,8 +38,8 @@ public:
 	void addSession(ServerSessionPointer session);
 	void removeSession(ServerSessionPointer session);
 	void transmit(const Message &message);
-	BabelString getName();
-	BabelString getPassword();
+	const BabelString &getName() const;
+	const BabelString &getPassword() const;
 	void setPassword(const BabelString &password);
 	bool getStatus() const;
 	void setStatus(bool status);

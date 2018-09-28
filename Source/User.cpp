@@ -22,12 +22,7 @@ void User::setName(const BabelString &name)
 	_name = name;
 }
 
-BabelString User::getName()
-{
-	return _name;
-}
-
-BabelString User::getPassword()
+const BabelString &User::getPassword() const
 {
 	return _password;
 }
@@ -75,4 +70,9 @@ void User::setID(unsigned char id)
 void User::setPassword(const BabelString &password)
 {
 	_password = password;
+}
+
+const BabelString &User::getName() const
+{
+	return _name;
 }

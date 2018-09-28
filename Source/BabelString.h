@@ -16,6 +16,7 @@ public:
     BabelString(const char *data);
     BabelString(const char *data, std::size_t size);
     BabelString(const char character, std::size_t size);
+    BabelString(const BabelString &string);
     ~BabelString();
 
     size_t getSize() const;
