@@ -72,7 +72,6 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
             _crypto.setRemotePublicKey(RSAPublicKey);
 
             /*
-
             BabelString encryptionKey = BabelString();
             BabelString encryptionIv = BabelString();
 
@@ -91,8 +90,7 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
             deliver(encryptionKey);
             deliver(encryptionIv);
             deliver(encryptedAESIv);
-
-            */
+             */
         }
         _client.display(Message(_readMsg, nullptr));
         startReadHeader();

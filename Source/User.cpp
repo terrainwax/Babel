@@ -5,7 +5,7 @@
 #include "User.h"
 
 User::User(Server &server, const BabelString &name)
-	: _server(server), _name(name), _isAvailable(true), _id(1)
+	: _server(server), _name(BabelString(name.getData())), _isAvailable(true), _id(1)
 {
 
 }

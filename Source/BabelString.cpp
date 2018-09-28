@@ -42,6 +42,7 @@ BabelString::BabelString(const char character, std::size_t size)
 BabelString::~BabelString()
 {
     std::free(_data);
+    _size = 0;
 }
 
 BabelString &BabelString::operator=(const BabelString &rhs)
