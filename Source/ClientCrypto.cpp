@@ -1,6 +1,8 @@
 #include "ClientCrypto.h"
 
-ClientCrypto::ClientCrypto() {
+ClientCrypto::ClientCrypto()
+: CommonCrypto()
+{
     _remotePublicKeyRSA = NULL;
 
     initialize();
@@ -29,6 +31,8 @@ void ClientCrypto::generateAesKey() {
         throw CryptoException("Cannot Generate AES Iv");
 }
 
+#include <iostream>
+
 std::string ClientCrypto::encryptRSA(const std::string &message, std::string &encryptionKey, std::string &encryptionIv) {
     size_t encryptedMessageLength = 0;
     size_t encryptionKeyLength = 0;
@@ -41,18 +45,26 @@ std::string ClientCrypto::encryptRSA(const std::string &message, std::string &en
 
     std::string encryptedMessage = std::string('\0', message.size() + EVP_MAX_IV_LENGTH);
 
+    std::cout << "Jambon" << std::endl;
+
     if(!EVP_SealInit(_encryptContextRSA, EVP_aes_256_cbc(), (unsigned char **)&encryptionKeyBuffer, (int*)&encryptionKeyLength, (unsigned char *)encryptionIv.data(), &_remotePublicKeyRSA, 1))
         throw CryptoException("Cannot Initialize RSA Encryption");
 
-    encryptionKey = std::string(encryptionKeyBuffer, encryptionKeyLength);
+    std::cout << "Jambon: " <<  message << std::endl;
+
+    //encryptionKey = std::string(encryptionKeyBuffer, encryptionKeyLength);
 
     if(!EVP_SealUpdate(_encryptContextRSA, (unsigned char *)encryptedMessage.data() + encryptedMessageLength, (int*)&blockLength, (const unsigned char*)message.c_str(), (int)message.size()))
         throw CryptoException("Cannot Update RSA Encryption");
+
+    std::cout << "Jambon" << std::endl;
 
     encryptedMessageLength += blockLength;
 
     if(!EVP_SealFinal(_encryptContextRSA, (unsigned char *)encryptedMessage.data() + encryptedMessageLength, (int*)&blockLength))
         throw CryptoException("Cannot Finalize RSA Encryption");
+
+    std::cout << "Jambon" << std::endl;
 
     encryptedMessageLength += blockLength;
     encryptionKey = encryptionKey.substr(0, encryptionKeyLength);

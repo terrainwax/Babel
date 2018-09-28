@@ -72,10 +72,14 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
             _crypto.setRemotePublicKey(RSAPublicKey);
 
             /*
-            std::string encryptionKey;
-            std::string encryptionIv;
+            std::string encryptionKey = std::string();
+            std::string encryptionIv = std::string();
 
-            std::string encryptedAESKey = _crypto.encryptRSA(_crypto.getAESKey(), encryptionKey, encryptionIv);
+            std::string homo = _crypto.getAESKey();
+
+            std::cout << "Hello: " << homo << std::endl;
+
+            std::string encryptedAESKey = _crypto.encryptRSA(homo, encryptionKey, encryptionIv);
 
             deliver(encryptionKey);
             deliver(encryptionIv);

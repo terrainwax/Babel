@@ -8,6 +8,7 @@
 #include "ServerCrypto.h"
 
 ServerCrypto::ServerCrypto()
+: CommonCrypto()
 {
 	_localKeyPairRSA = NULL;
 
