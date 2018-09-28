@@ -137,10 +137,11 @@ void CommandLexer::list(Packet &packet, ServerSession *session)
 
 void CommandLexer::login(Packet &packet, ServerSession *session)
 {
-	auto logged_in = [&] (BabelString user) {
-		std::cout << "User " << user << " logged in." << std::endl;
+	auto logged_in = [&] (User *user) {
+		std::cout << "User " << user->getName() << " logged in." << std::endl;
 		sendAnswer("OK", session);
 	};
+
 	BabelString args(((Command *)packet.body())->data.data + sizeof(CommandIdentifier));
 	auto tokens = tokenize(args);
 	auto username = BabelString((*tokens.begin()).c_str());
@@ -154,7 +155,7 @@ void CommandLexer::login(Packet &packet, ServerSession *session)
 
 	if (session->hasUser()) {
 		session->getUser()->setName(username);
-		logged_in(username);
+		logged_in(session->getUser());
 		return;
 	}
 
@@ -164,11 +165,11 @@ void CommandLexer::login(Packet &packet, ServerSession *session)
 		session->setUser(user);
 		if (!password.empty())
 			user->setPassword(password);
-		logged_in(username);
+		logged_in(session->getUser());
 	} else {
 		if (user->getPassword() == password) {
 			session->setUser(user);
-			logged_in(username);
+			logged_in(session->getUser());
 		} else {
 			std::cout << "ServerSession " << session
 				<< " failed login with username "
