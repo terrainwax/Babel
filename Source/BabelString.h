@@ -28,6 +28,7 @@ public:
     bool operator==(const char *rhs) const;
     BabelString operator+(const BabelString &rhs) const;
     BabelString operator+(const char *rhs) const;
+    BabelString &operator=(const BabelString & rhs);
 
     char* begin() const;
     char* end() const;
