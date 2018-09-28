@@ -9,7 +9,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <deque>
-#include <string>
+
+#include "BabelString.h"
+
 class Packet {
 public:
 	static const unsigned char header_length = 2;
@@ -26,7 +28,7 @@ public:
 	void bodyLength(std::size_t new_length);
 	bool decodeHeader();
 	void encodeHeader();
-	std::string str();
+	BabelString str();
 
 private:
 	unsigned char _data[header_length + max_body_length];

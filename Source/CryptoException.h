@@ -9,7 +9,7 @@
 
 class CryptoException: public BabelException {
 public:
-    CryptoException(const std::string &message);
+    CryptoException(const BabelString &message);
 };
 
 

@@ -8,10 +8,10 @@ public:
     ClientCrypto();
     ~ClientCrypto();
 
-    std::string encryptRSA(const std::string &message, std::string &encryptionKey, std::string &encryptionIv);
+    BabelString encryptRSA(const BabelString &message, BabelString &encryptionKey, BabelString &encryptionIv);
 
-    std::string getRemotePublicKey();
-    void setRemotePublicKey(const std::string &publicKey);
+    BabelString getRemotePublicKey();
+    void setRemotePublicKey(const BabelString &publicKey);
 
 private:
     EVP_PKEY *_remotePublicKeyRSA;

@@ -60,7 +60,7 @@ void Packet::encodeHeader()
 	((unsigned short *)_data)[0] = _body_length;
 }
 
-std::string Packet::str()
+BabelString Packet::str()
 {
-	return std::string((char *)_data + header_length, bodyLength());
+	return BabelString((char *)_data + header_length, bodyLength());
 }

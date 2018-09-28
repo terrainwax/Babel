@@ -24,21 +24,21 @@ void CommonCrypto::initialize()
 
     EVP_CipherInit_ex(_encryptContextAES, EVP_aes_256_cbc(), NULL, NULL, NULL, 1);
 
-    _aesKey = std::string('A', EVP_CIPHER_CTX_key_length(_encryptContextAES));
-    _aesIv = std::string('A', EVP_CIPHER_CTX_iv_length(_encryptContextAES));
+    _aesKey = BabelString('\0', EVP_CIPHER_CTX_key_length(_encryptContextAES));
+    _aesIv = BabelString('\0', EVP_CIPHER_CTX_iv_length(_encryptContextAES));
 }
 
-std::string CommonCrypto::encryptAES(const std::string &message)
+BabelString CommonCrypto::encryptAES(const BabelString &message)
 {
     size_t blockLength = 0;
     size_t encryptedMessageLength;
 
-    char encryptedMessageBuffer[message.size() + AES_BLOCK_SIZE];
+    char encryptedMessageBuffer[message.getSize() + AES_BLOCK_SIZE];
 
-    if(!EVP_EncryptInit_ex(_encryptContextAES, EVP_aes_256_cbc(), NULL, (unsigned char *)_aesKey.c_str(), (unsigned char *)_aesIv.c_str()))
+    if(!EVP_EncryptInit_ex(_encryptContextAES, EVP_aes_256_cbc(), NULL, (unsigned char *)_aesKey.getData(), (unsigned char *)_aesIv.getData()))
         throw CryptoException("Cannot Initialize AES Encryption");
 
-    if(!EVP_EncryptUpdate(_encryptContextAES, (unsigned char *)encryptedMessageBuffer, (int*)&blockLength, (unsigned char *)message.c_str(), message.size()))
+    if(!EVP_EncryptUpdate(_encryptContextAES, (unsigned char *)encryptedMessageBuffer, (int*)&blockLength, (unsigned char *)message.getData(), message.getSize()))
         throw CryptoException("Cannot Update AES Encryption");
 
     encryptedMessageLength += blockLength;
@@ -48,19 +48,19 @@ std::string CommonCrypto::encryptAES(const std::string &message)
 
     encryptedMessageLength += blockLength;
 
-    return std::string(encryptedMessageBuffer, encryptedMessageLength);
+    return BabelString(encryptedMessageBuffer, encryptedMessageLength);
 }
 
-std::string CommonCrypto::decryptAES(const std::string &encryptedMessage) {
+BabelString CommonCrypto::decryptAES(const BabelString &encryptedMessage) {
     size_t blockLength = 0;
     size_t decryptedMessageLength = 0;
 
-    char decryptedMessageBuffer[encryptedMessage.size()];
+    char decryptedMessageBuffer[encryptedMessage.getSize()];
 
-    if(!EVP_DecryptInit_ex(_decryptContextAES, EVP_aes_256_cbc(), NULL, (unsigned char *)_aesKey.c_str(), (unsigned char *)_aesIv.c_str()))
+    if(!EVP_DecryptInit_ex(_decryptContextAES, EVP_aes_256_cbc(), NULL, (unsigned char *)_aesKey.getData(), (unsigned char *)_aesIv.getData()))
         throw CryptoException("Cannot Initialize AES Decryption");
 
-    if(!EVP_DecryptUpdate(_decryptContextAES, (unsigned char*)decryptedMessageBuffer, (int*)&blockLength, (unsigned char *)encryptedMessage.c_str(), encryptedMessage.size()))
+    if(!EVP_DecryptUpdate(_decryptContextAES, (unsigned char*)decryptedMessageBuffer, (int*)&blockLength, (unsigned char *)encryptedMessage.getData(), encryptedMessage.getSize()))
         throw CryptoException("Cannot Update AES Decryption");
 
     decryptedMessageLength += blockLength;
@@ -70,30 +70,30 @@ std::string CommonCrypto::decryptAES(const std::string &encryptedMessage) {
 
     decryptedMessageLength += blockLength;
 
-    return std::string(decryptedMessageBuffer, decryptedMessageLength);
+    return BabelString(decryptedMessageBuffer, decryptedMessageLength);
 }
 
-std::string CommonCrypto::getAESKey()
+BabelString CommonCrypto::getAESKey()
 {
     return _aesKey;
 }
 
-void CommonCrypto::setAESKey(const std::string &aesKey)
+void CommonCrypto::setAESKey(const BabelString &aesKey)
 {
-    if (_aesKey.size() != aesKey.size())
+    if (_aesKey.getSize() != aesKey.getSize())
         throw CryptoException("Cannot Set New AES Key : Wrong Size");
 
     _aesKey = aesKey;
 }
 
-std::string CommonCrypto::getAESIv()
+BabelString CommonCrypto::getAESIv()
 {
     return _aesIv;
 }
 
-void CommonCrypto::setAESIv(const std::string &aesIv)
+void CommonCrypto::setAESIv(const BabelString &aesIv)
 {
-    if (_aesIv.size() != aesIv.size())
+    if (_aesIv.getSize() != aesIv.getSize())
         throw CryptoException("Cannot Set New AES Iv : Wrong Size");
 
     _aesIv = aesIv;

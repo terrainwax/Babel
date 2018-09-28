@@ -6,15 +6,16 @@
 #define CPP_BABEL_2018_BABEL_EXCEPTION_H
 
 #include <exception>
-#include <string>
+
+#include "BabelString.h"
 
 class BabelException: public std::exception {
 public:
-    BabelException(const std::string &message);
+    BabelException(const BabelString &message);
     const char *what() const throw();
 
 private:
-    std::string _message;
+    BabelString _message;
 };
 
 #endif //CPP_BABEL_2018_BABEL_EXCEPTION_H

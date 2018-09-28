@@ -30,12 +30,12 @@ void CommandLexer::parse(Packet &packet, ServerSession *session)
 		ko();
 }
 
-void CommandLexer::sendAnswer(std::string answer, ServerSession *session)
+void CommandLexer::sendAnswer(BabelString answer, ServerSession *session)
 {
 	Packet packet;
 
-	packet.bodyLength(answer.size());
-	std::strcpy(packet.body(), answer.c_str());
+	packet.bodyLength(answer.getSize());
+	std::memcpy(packet.body(), answer.getData(), packet.bodyLength());
 	packet.encodeHeader();
 	session->deliver(packet);
 }
@@ -71,7 +71,7 @@ void CommandLexer::online(Packet &packet, ServerSession *session)
 	_server.getOnlineUsers().emplace_back(session->getUser());
 	char string_id[4] = {0};
 	std::snprintf(string_id, 4, "%03u", id);
-	sendAnswer(std::string("OK ") + string_id, session);
+	sendAnswer(BabelString("OK ") + string_id, session);
 }
 
 void CommandLexer::offline(Packet &packet, ServerSession *session)
@@ -117,39 +117,40 @@ void CommandLexer::alive(Packet &packet, ServerSession *session)
 
 void CommandLexer::list(Packet &packet, ServerSession *session)
 {
-	std::string answer("OK");
+	BabelString answer("OK");
 
 	for (auto user : _server.getOnlineUsers())
 	{
 		if (user == session->getUser())
 			continue;
 		char line[1024];
-		std::snprintf(line, 1024, "\n%s#%03u %s", user->getName().c_str(),
+		std::snprintf(line, 1024, "\n%s#%03u %s", user->getName().getData(),
 			user->getID(), user->getStatus() ? "available" : "busy");
 		answer.append(line);
 	}
 
-	if (answer.size() != std::string("OK").size())
+	if (answer.getSize() != BabelString("OK").getSize())
 		answer.append("\n");
+
 	sendAnswer(answer, session);
 }
 
 void CommandLexer::login(Packet &packet, ServerSession *session)
 {
-	auto logged_in = [&] (std::string user) {
+	auto logged_in = [&] (BabelString user) {
 		std::cout << "User " << user << " logged in." << std::endl;
 		sendAnswer("OK", session);
 	};
-	std::string args(((Command *)packet.body())->data.data + sizeof(CommandIdentifier));
+	BabelString args(((Command *)packet.body())->data.data + sizeof(CommandIdentifier));
 	auto tokens = tokenize(args);
-	auto username = *tokens.begin();
+	auto username = BabelString((*tokens.begin()).c_str());
 
 	// yeah there isn't any other way, cpp is amazing -victor
 	auto passwordPtr = tokens.begin();
-	std::string password;
+	BabelString password;
 	passwordPtr++;
 	if (passwordPtr != tokens.end())
-		password = *passwordPtr;
+		password = BabelString((*passwordPtr).c_str());
 
 	if (session->hasUser()) {
 		session->getUser()->setName(username);
@@ -178,7 +179,7 @@ void CommandLexer::login(Packet &packet, ServerSession *session)
 	}
 }
 
-CommandLexer::Tokens CommandLexer::tokenize(std::string &toTokenize)
+CommandLexer::Tokens CommandLexer::tokenize(BabelString &toTokenize)
 {
 	boost::char_separator<char> separator(" \t");
 	return Tokens(toTokenize, separator);

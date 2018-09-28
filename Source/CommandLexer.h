@@ -28,8 +28,8 @@ public:
 private:
 	typedef boost::tokenizer<boost::char_separator<char>> Tokens;
 
-	void sendAnswer(std::string answer, ServerSession *session);
-	Tokens tokenize(std::string &toTokenize);
+	void sendAnswer(BabelString answer, ServerSession *session);
+	Tokens tokenize(BabelString &toTokenize);
 
 	void login(Packet &packet, ServerSession *session);
 	void online(Packet &packet, ServerSession *session);

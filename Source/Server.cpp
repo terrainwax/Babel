@@ -29,7 +29,7 @@ void Server::broadcast(Message message)
         session->deliver(message.getPacket());
 }
 
-User *Server::getUser(const std::string &name) {
+User *Server::getUser(const BabelString &name) {
     for (auto user: _users)
     {
         if (user->getName() == name)
@@ -39,7 +39,7 @@ User *Server::getUser(const std::string &name) {
     return nullptr;
 }
 
-User *Server::newUser(const std::string &name) {
+User *Server::newUser(const BabelString &name) {
     std::cout << "New user : " << name << std::endl;
 
     UserPointer user = User::create(*this, name);

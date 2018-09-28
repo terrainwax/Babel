@@ -4,30 +4,30 @@
 
 #include "User.h"
 
-User::User(Server &server, const std::string &name)
+User::User(Server &server, const BabelString &name)
 	: _server(server), _name(name), _isAvailable(true), _id(1)
 {
 
 }
 
-User::UserPointer User::create(Server &server, const std::string &name)
+User::UserPointer User::create(Server &server, const BabelString &name)
 {
 	return UserPointer(new User(server, name));
 }
 
-void User::setName(const std::string &name)
+void User::setName(const BabelString &name)
 {
 	std::cout << "User '" << _name << "' changed his name for '" << name << "'" << std::endl;
 
 	_name = name;
 }
 
-std::string User::getName()
+BabelString User::getName()
 {
 	return _name;
 }
 
-std::string User::getPassword()
+BabelString User::getPassword()
 {
 	return _password;
 }
@@ -72,7 +72,7 @@ void User::setID(unsigned char id)
 	_id = id;
 }
 
-void User::setPassword(const std::string &password)
+void User::setPassword(const BabelString &password)
 {
 	_password = password;
 }

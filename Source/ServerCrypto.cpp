@@ -46,21 +46,21 @@ void ServerCrypto::generateRsaKeypair()
 	EVP_PKEY_CTX_free(context);
 }
 
-std::string ServerCrypto::decryptRSA(const std::string &encryptedMessage, const std::string &encryptionKey, const std::string &encryptionIv)
+BabelString ServerCrypto::decryptRSA(const BabelString &encryptedMessage, const BabelString &encryptionKey, const BabelString &encryptionIv)
 {
 	size_t decryptedMessageLength = 0;
 	size_t blockLength = 0;
 
-	char decryptedMessageBuffer[encryptedMessage.size() + encryptionIv.size()];
+	char decryptedMessageBuffer[encryptedMessage.getSize() + encryptionIv.getSize()];
 
-	if (!EVP_OpenInit(_decryptContextRSA, EVP_aes_256_cbc(), (unsigned char *)encryptionKey.data(),
-		encryptionKey.size(), (unsigned char *)encryptionIv.data(), _localKeyPairRSA))
+	if (!EVP_OpenInit(_decryptContextRSA, EVP_aes_256_cbc(), (unsigned char *)encryptionKey.getData(),
+		encryptionKey.getSize(), (unsigned char *)encryptionIv.getData(), _localKeyPairRSA))
 		throw CryptoException("Cannot Initialize RSA Decryption");
 
 	if (!EVP_OpenUpdate(_decryptContextRSA,
 		(unsigned char *)decryptedMessageBuffer + decryptedMessageLength,
-		(int *)&blockLength, (unsigned char *)encryptedMessage.c_str(),
-		(int)encryptedMessage.size()))
+		(int *)&blockLength, (unsigned char *)encryptedMessage.getData(),
+		(int)encryptedMessage.getSize()))
 		throw CryptoException("Cannot Update RSA Decryption");
 
 	decryptedMessageLength += blockLength;
@@ -72,10 +72,10 @@ std::string ServerCrypto::decryptRSA(const std::string &encryptedMessage, const 
 
 	decryptedMessageLength += blockLength;
 
-	return std::string(decryptedMessageBuffer, decryptedMessageLength);
+	return BabelString(decryptedMessageBuffer, decryptedMessageLength);
 }
 
-std::string ServerCrypto::getLocalPublicKey()
+BabelString ServerCrypto::getLocalPublicKey()
 {
     BIO *bio = BIO_new(BIO_s_mem());
 
@@ -86,10 +86,10 @@ std::string ServerCrypto::getLocalPublicKey()
     BIO_read(bio, keyBuffer, bioLength);
     BIO_free_all(bio);
 
-    return std::string(keyBuffer, bioLength - 1);
+    return BabelString(keyBuffer, bioLength - 1);
 }
 
-std::string ServerCrypto::getLocalPrivateKey()
+BabelString ServerCrypto::getLocalPrivateKey()
 {
 	BIO *bio = BIO_new(BIO_s_mem());
 
@@ -100,5 +100,5 @@ std::string ServerCrypto::getLocalPrivateKey()
     BIO_read(bio, keyBuffer, bioLength);
     BIO_free_all(bio);
 
-    return std::string(keyBuffer, bioLength - 1);
+    return BabelString(keyBuffer, bioLength - 1);
 }

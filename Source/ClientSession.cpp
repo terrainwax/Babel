@@ -24,9 +24,9 @@ tcp::socket &ClientSession::getSocket()
     return _socket;
 }
 
-std::string ClientSession::getAddress() const
+BabelString ClientSession::getAddress() const
 {
-    return _socket.remote_endpoint().address().to_string();
+    return BabelString(_socket.remote_endpoint().address().to_string().c_str());
 }
 
 void ClientSession::open() {
@@ -68,25 +68,25 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
         {
             std::cout << "Received RSA Public Key From Server." << std::endl;
 
-            const std::string RSAPublicKey = _readMsg.str();
+            const BabelString RSAPublicKey = _readMsg.str();
             _crypto.setRemotePublicKey(RSAPublicKey);
 
             /*
 
-            std::string encryptionKey = std::string();
-            std::string encryptionIv = std::string();
+            BabelString encryptionKey = BabelString();
+            BabelString encryptionIv = BabelString();
 
-            std::string homo = _crypto.getAESKey();
+            BabelString homo = _crypto.getAESKey();
 
             std::cout << "Hello: " << homo << std::endl;
 
-            std::string encryptedAESKey = _crypto.encryptRSA(homo, encryptionKey, encryptionIv);
+            BabelString encryptedAESKey = _crypto.encryptRSA(homo, encryptionKey, encryptionIv);
 
             deliver(encryptionKey);
             deliver(encryptionIv);
             deliver(encryptedAESKey);
 
-            std::string encryptedAESIv = _crypto.encryptRSA(_crypto.getAESIv(), encryptionKey, encryptionIv);
+            BabelString encryptedAESIv = _crypto.encryptRSA(_crypto.getAESIv(), encryptionKey, encryptionIv);
 
             deliver(encryptionKey);
             deliver(encryptionIv);
@@ -104,10 +104,10 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
 
 void ClientSession::startWrite()
 {
-    auto _message = std::string(_writeMessageQueue.front().data(),
+    auto _message = BabelString(_writeMessageQueue.front().data(),
                                 _writeMessageQueue.front().length());
 
-    boost::asio::async_write(_socket, boost::asio::buffer(_message),
+    boost::asio::async_write(_socket, boost::asio::buffer(_message.getData(), _message.getSize()),
                              boost::bind(&ClientSession::handleWrite, shared_from_this(),
                                          boost::asio::placeholders::error,
                                          boost::asio::placeholders::bytes_transferred));
@@ -126,11 +126,11 @@ void ClientSession::handleWrite(const boost::system::error_code &error, size_t b
     }
 }
 
-void ClientSession::deliver(const std::string &message)
+void ClientSession::deliver(const BabelString &message)
 {
     Packet packet;
-    packet.bodyLength(message.size());
-    std::memcpy(packet.body(), message.data(), packet.bodyLength());
+    packet.bodyLength(message.getSize());
+    std::memcpy(packet.body(), message.getData(), packet.bodyLength());
     packet.encodeHeader();
 
     bool write_in_progress = !_writeMessageQueue.empty();

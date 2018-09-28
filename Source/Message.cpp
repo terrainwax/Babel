@@ -28,7 +28,7 @@ ServerSession *Message::getSender() const
 
 std::ostream& operator<<(std::ostream& os, const Message& message)
 {
-    os << "'" << std::string(message.getPacket().body(), message.getPacket().bodyLength()) << "'";
+    os << "'" << BabelString(message.getPacket().body(), message.getPacket().bodyLength()) << "'";
 
     if (message.hasSender())
         os << " from " << *message.getSender();

@@ -15,10 +15,10 @@ class ServerCrypto: public CommonCrypto {
     ServerCrypto();
     ~ServerCrypto();
 
-    std::string decryptRSA(const std::string &encryptedMessage, const std::string &encryptionKey, const std::string &encryptionIv);
+    BabelString decryptRSA(const BabelString &encryptedMessage, const BabelString &encryptionKey, const BabelString &encryptionIv);
 
-    std::string getLocalPublicKey();
-    std::string getLocalPrivateKey();
+    BabelString getLocalPublicKey();
+    BabelString getLocalPrivateKey();
 
   private:
     EVP_PKEY *_localKeyPairRSA;

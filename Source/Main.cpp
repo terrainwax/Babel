@@ -5,6 +5,8 @@
 ** Main.cpp
 */
 
+#include <string>
+
 #include "Client.h"
 #include "Server.h"
 
@@ -29,7 +31,7 @@ int main_client(int argc, char *argv[]) {
 		sleep(1);
 
 		std::cout << "Username: ";
-		std::string username;
+		BabelString username;
 		getline(std::cin, username);
 
 		std::cout << "Password: ";
@@ -40,7 +42,7 @@ int main_client(int argc, char *argv[]) {
 		newt.c_lflag &= ~ECHO;
 		tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
-		std::string password;
+		BabelString password;
 		getline(std::cin, password);
 
 		tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
@@ -72,7 +74,7 @@ int main_client(int argc, char *argv[]) {
 			line = line.substr(static_cast<unsigned long>(indexChar));
 			std::memcpy((char *)command.data.data + sizeof(CommandIdentifier), line.c_str(), line.size());
 
-			client.write(std::string((char *)&command, sizeof(Command)));
+			client.write(BabelString((char *)&command, sizeof(Command)));
 		}
 
 		client.stop();
@@ -121,9 +123,9 @@ int main(int argc, char *argv[]) {
 	if (argc <= 1)
 		std::cerr << "Usage: Chat <-c|-s> <...>\n";
 	else {
-		if (std::string(argv[1]) == "-c")
+		if (BabelString(argv[1]) == "-c")
 			return main_client(argc - 1, argv + 1);
-		else if (std::string(argv[1]) == "-s")
+		else if (BabelString(argv[1]) == "-s")
 			return main_server(argc - 1, argv + 1);
 		else
 			std::cerr << "Usage: Chat <-c|-s>\n";

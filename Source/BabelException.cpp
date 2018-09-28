@@ -4,7 +4,7 @@
 
 #include "BabelException.h"
 
-BabelException::BabelException(const std::string &message)
+BabelException::BabelException(const BabelString &message)
     :   _message(message)
 {
 
@@ -12,5 +12,5 @@ BabelException::BabelException(const std::string &message)
 
 const char* BabelException::what() const throw()
 {
-    return _message.c_str();
+    return _message.getData();
 }

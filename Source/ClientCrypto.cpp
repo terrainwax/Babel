@@ -24,22 +24,22 @@ void ClientCrypto::initialize() {
 }
 
 void ClientCrypto::generateAesKey() {
-    char aesKeyBuffer[_aesKey.size()];
-    char aesIvBuffer[_aesIv.size()];
+    char aesKeyBuffer[_aesKey.getSize()];
+    char aesIvBuffer[_aesIv.getSize()];
 
-    if(RAND_bytes((unsigned char *)aesKeyBuffer, _aesKey.size()) == 0)
+    if(RAND_bytes((unsigned char *)aesKeyBuffer, _aesKey.getSize()) == 0)
         throw CryptoException("Cannot Generate AES Key");
 
-    if(RAND_bytes((unsigned char *)aesIvBuffer, _aesIv.size()) == 0)
+    if(RAND_bytes((unsigned char *)aesIvBuffer, _aesIv.getSize()) == 0)
         throw CryptoException("Cannot Generate AES Iv");
 
-    _aesKey = std::string(aesKeyBuffer, _aesKey.size());
-    _aesIv = std::string(aesIvBuffer, _aesIv.size());
+    _aesKey = BabelString(aesKeyBuffer, _aesKey.getSize());
+    _aesIv = BabelString(aesIvBuffer, _aesIv.getSize());
 }
 
 #include <iostream>
 
-std::string ClientCrypto::encryptRSA(const std::string &message, std::string &encryptionKey, std::string &encryptionIv) {
+BabelString ClientCrypto::encryptRSA(const BabelString &message, BabelString &encryptionKey, BabelString &encryptionIv) {
     size_t encryptedMessageLength = 0;
     size_t encryptionKeyLength = 0;
     size_t blockLength = 0;
@@ -47,7 +47,7 @@ std::string ClientCrypto::encryptRSA(const std::string &message, std::string &en
     char encryptionKeyBuffer[EVP_PKEY_size(_remotePublicKeyRSA)];
     char encryptionIvBuffer[EVP_MAX_IV_LENGTH];
 
-    char encryptedMessageBuffer[message.size() + EVP_MAX_IV_LENGTH];
+    char encryptedMessageBuffer[message.getSize() + EVP_MAX_IV_LENGTH];
 
     std::cout << "Jambon" << std::endl;
 
@@ -56,7 +56,7 @@ std::string ClientCrypto::encryptRSA(const std::string &message, std::string &en
 
     std::cout << "Jambon: " <<  message << std::endl;
 
-    if(!EVP_SealUpdate(_encryptContextRSA, (unsigned char *)encryptedMessageBuffer + encryptedMessageLength, (int*)&blockLength, (const unsigned char*)message.c_str(), (int)message.size()))
+    if(!EVP_SealUpdate(_encryptContextRSA, (unsigned char *)encryptedMessageBuffer + encryptedMessageLength, (int*)&blockLength, (const unsigned char*)message.getData(), (int)message.getSize()))
         throw CryptoException("Cannot Update RSA Encryption");
 
     std::cout << "Jambon" << std::endl;
@@ -69,13 +69,13 @@ std::string ClientCrypto::encryptRSA(const std::string &message, std::string &en
     std::cout << "Jambon" << std::endl;
 
     encryptedMessageLength += blockLength;
-    encryptionKey = std::string(encryptionKeyBuffer, encryptionKeyLength);
-    encryptionIv = std::string(encryptionIvBuffer, EVP_MAX_IV_LENGTH);
+    encryptionKey = BabelString(encryptionKeyBuffer, encryptionKeyLength);
+    encryptionIv = BabelString(encryptionIvBuffer, EVP_MAX_IV_LENGTH);
 
-    return std::string(encryptedMessageBuffer, encryptedMessageLength);
+    return BabelString(encryptedMessageBuffer, encryptedMessageLength);
 }
 
-std::string ClientCrypto::getRemotePublicKey()
+BabelString ClientCrypto::getRemotePublicKey()
 {
     BIO *bio = BIO_new(BIO_s_mem());
 
@@ -87,13 +87,13 @@ std::string ClientCrypto::getRemotePublicKey()
     BIO_read(bio, keyBuffer, bioLength);
     BIO_free_all(bio);
 
-    return std::string(keyBuffer, bioLength - 1);
+    return BabelString(keyBuffer, bioLength - 1);
 }
 
-void ClientCrypto::setRemotePublicKey(const std::string &publicKey) {
+void ClientCrypto::setRemotePublicKey(const BabelString &publicKey) {
     BIO *bio = BIO_new(BIO_s_mem());
 
-    BIO_write(bio, publicKey.data(), publicKey.size());
+    BIO_write(bio, publicKey.getData(), publicKey.getSize());
     PEM_read_bio_PUBKEY(bio, &_remotePublicKeyRSA, NULL, NULL);
 
     BIO_free_all(bio);

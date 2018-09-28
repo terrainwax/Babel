@@ -9,13 +9,13 @@
 #define CPP_BABEL_2018_SERVER_SESSION_HPP
 
 #include <deque>
-#include <string>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "BabelString.h"
 #include "Packet.h"
 #include "ServerCrypto.h"
 
@@ -36,7 +36,7 @@ public:
 	bool hasUser() const;
 	void setUser(User *user);
 	User *getUser() const;
-	std::string getAddress() const;
+	BabelString getAddress() const;
 
 private:
 
@@ -48,7 +48,7 @@ private:
 	void handleReadHeader(const boost::system::error_code &error, size_t bytes);
 	void startReadBody();
 	void handleReadBody(const boost::system::error_code &error, size_t bytes);
-	void deliverString(std::string string);
+	void deliverString(BabelString string);
 
 	Server &_server;
 	tcp::socket _socket;

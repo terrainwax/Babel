@@ -12,9 +12,9 @@
 #include <openssl/rand.h>
 
 #include <memory>
-#include <string>
 #include <cstring>
 
+#include "BabelString.h"
 #include "CryptoException.h"
 
 #define RSA_KEYLEN 2048
@@ -24,18 +24,18 @@ public:
     CommonCrypto();
     ~CommonCrypto();
 
-    std::string encryptAES(const std::string &message);
-    std::string decryptAES(const std::string &encryptedMessage);
+    BabelString encryptAES(const BabelString &message);
+    BabelString decryptAES(const BabelString &encryptedMessage);
 
-    std::string getAESKey();
-    void setAESKey(const std::string &aesKey);
+    BabelString getAESKey();
+    void setAESKey(const BabelString &aesKey);
 
-    std::string getAESIv();
-    void setAESIv(const std::string &aesIv);
+    BabelString getAESIv();
+    void setAESIv(const BabelString &aesIv);
 
 protected:
-    std::string _aesKey;
-    std::string _aesIv;
+    BabelString _aesKey;
+    BabelString _aesIv;
 
 private:
     EVP_CIPHER_CTX *_encryptContextAES;

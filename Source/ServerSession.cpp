@@ -23,9 +23,9 @@ tcp::socket &ServerSession::getSocket()
 	return _socket;
 }
 
-std::string ServerSession::getAddress() const
+BabelString ServerSession::getAddress() const
 {
-	return _socket.remote_endpoint().address().to_string();
+	return BabelString(_socket.remote_endpoint().address().to_string().c_str());
 }
 
 void ServerSession::open() {
@@ -39,13 +39,13 @@ void ServerSession::sendRSAPublicKey()
 {
 	std::cout << "Sending RSA Public Key." << std::endl;
 
-	std::string key = _crypto.getLocalPublicKey();
+	BabelString key = _crypto.getLocalPublicKey();
 
 	std::cout << "'" << key << "'" << std::endl;
 
 	Packet packet;
-	packet.bodyLength(key.size());
-	std::memcpy(packet.body(), key.data(), packet.bodyLength());
+	packet.bodyLength(key.getSize());
+	std::memcpy(packet.body(), key.getData(), packet.bodyLength());
 	packet.encodeHeader();
 	deliver(packet);
 }
@@ -106,10 +106,10 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 
 void ServerSession::startWrite()
 {
-	auto _message = std::string(_writeMessageQueue.front().data(),
+	auto _message = BabelString(_writeMessageQueue.front().data(),
 		_writeMessageQueue.front().length());
 
-	boost::asio::async_write(_socket, boost::asio::buffer(_message),
+	boost::asio::async_write(_socket, boost::asio::buffer(_message.getData(), _message.getSize()),
 		boost::bind(&ServerSession::handleWrite, shared_from_this(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred));
@@ -150,12 +150,12 @@ std::ostream& operator<<(std::ostream& os, const ServerSession& session)
 	return os;
 }
 
-void ServerSession::deliverString(std::string string)
+void ServerSession::deliverString(BabelString string)
 {
 	Packet packet;
 
-	packet.bodyLength(string.size());
-	std::strcpy(packet.body(), string.c_str());
+	packet.bodyLength(string.getSize());
+	std::memcpy(packet.body(), string.getData(), packet.bodyLength());
 	packet.encodeHeader();
 	deliver(packet);
 }

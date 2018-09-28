@@ -4,10 +4,10 @@
 
 #include "Client.h"
 
-Client::Client(const std::string &address,
+Client::Client(const BabelString &address,
 	unsigned short port)
 	: _io_context(),
-	_endpoint(boost::asio::ip::address::from_string(address), port)
+	_endpoint(boost::asio::ip::address::from_string(address.getData()), port)
 {
 
 	startConnect();
@@ -49,7 +49,7 @@ void Client::display(Message message)
 	std::cout << "Received message: " << message << std::endl;
 }
 
-void Client::write(const std::string &message) {
+void Client::write(const BabelString &message) {
 	for (auto session: _sessions)
 		session->deliver(message);
 }

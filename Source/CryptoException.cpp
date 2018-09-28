@@ -4,7 +4,7 @@
 
 #include "CryptoException.h"
 
-CryptoException::CryptoException(const std::string &message)
+CryptoException::CryptoException(const BabelString &message)
     : BabelException(message)
 {
 

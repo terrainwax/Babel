@@ -27,8 +27,8 @@ public:
     void start();
     void stop();
     void broadcast(Message message);
-    User *getUser(const std::string &name);
-    User *newUser(const std::string &name);
+    User *getUser(const BabelString &name);
+    User *newUser(const BabelString &name);
     CommandLexer &getLexer();
     std::vector<User *> &getOnlineUsers();
 

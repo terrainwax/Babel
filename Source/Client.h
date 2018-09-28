@@ -22,11 +22,11 @@ class Message;
 
 class Client {
 public:
-    Client(const std::string &address,
+    Client(const BabelString &address,
             unsigned short port);
 
     void start();
-    void write(const std::string &message);
+    void write(const BabelString &message);
     void display(Message message);
 
     void stop();
