@@ -1,3 +1,5 @@
+# fuck windows et fuck epitech et fuck visual et fuck conan
+
 rm -rf build/
 mkdir build
 
