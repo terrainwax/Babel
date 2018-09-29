@@ -183,5 +183,5 @@ void CommandLexer::login(Packet &packet, ServerSession *session)
 CommandLexer::Tokens CommandLexer::tokenize(BabelString &toTokenize)
 {
 	boost::char_separator<char> separator(" \t");
-	return Tokens(toTokenize, separator);
+	return Tokens(std::string(toTokenize.getData()), separator);
 }
