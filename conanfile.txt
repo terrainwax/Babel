@@ -3,7 +3,6 @@ boost/1.68.0@conan/stable
 portaudio/v190600.20161030@bincrafters/stable
 opus/1.2.1@bincrafters/stable
 Qt/5.11.1@bincrafters/stable
-OpenSSL/1.0.2o@conan/stable
 
 [generators]
 cmake
