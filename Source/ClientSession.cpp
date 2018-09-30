@@ -73,7 +73,12 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
 
                 BabelString aesKey = _crypto.getAESKey();
 
-                std::cout << "Sending Encrypted AES Key: " << aesKey << std::endl;
+                std::cout << "Received Encrypted AES Key: ";
+
+                for (int i = 0; i < aesKey.getSize(); ++i)
+                    std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesKey.getData()[i];
+
+                std::cout << std::endl;
 
                 BabelString encryptedAESKey = _crypto.encryptRSA(aesKey);
 
@@ -81,7 +86,12 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
 
                 BabelString aesIv = _crypto.getAESIv();
 
-                std::cout << "Sending Encrypted AES Iv: " << aesIv << std::endl;
+                std::cout << "Received Encrypted AES Iv: ";
+
+                for (int i = 0; i < aesIv.getSize(); ++i)
+                    std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesIv.getData()[i];
+
+                std::cout << std::endl;
 
                 BabelString encryptedAESIv = _crypto.encryptRSA(aesIv);
 

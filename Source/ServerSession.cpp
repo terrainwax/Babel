@@ -96,14 +96,28 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 
 				_crypto.setAESKey(_crypto.decryptRSA(encryptedAESKey));
 
-				std::cout << "Received Encrypted AES Key: " << _crypto.getAESKey() << std::endl;
+				BabelString aesKey = _crypto.getAESKey();
+
+				std::cout << "Received Encrypted AES Key: ";
+
+				for (int i = 0; i < aesKey.getSize(); ++i)
+					std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesKey.getData()[i];
+
+				std::cout << std::endl;
 			}
 			if (_readMsg.str().substr(0, 17) == "ENCRYPTED AES IV:") {
 				BabelString encryptedAESIv = _readMsg.str().substr(17, _readMsg.str().getSize() - 17);
 
 				_crypto.setAESIv(_crypto.decryptRSA(encryptedAESIv));
 
-				std::cout << "Received Encrypted AES Iv: " << _crypto.getAESIv() << std::endl;
+				BabelString aesIv = _crypto.getAESIv();
+
+				std::cout << "Received Encrypted AES Iv: ";
+
+				for (int i = 0; i < aesIv.getSize(); ++i)
+					std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesIv.getData()[i];
+
+				std::cout << std::endl;
 
 				std::cout << "Channel Secured." << std::endl;
 

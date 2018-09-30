@@ -9,6 +9,7 @@
 #define CPP_BABEL_2018_SERVER_SESSION_HPP
 
 #include <deque>
+#include <iomanip>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
