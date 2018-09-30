@@ -23,6 +23,10 @@ CommandLexer::CommandLexer(Server &server) : _server(server)
 void CommandLexer::parse(BabelString &message, ServerSession *session)
 {
 	auto command = (Command *) message.getData();
+
+	if (command->magic != COMMAND_MAGIC)
+		ko();
+
 	auto function = _functionMap[command->data.id];
 	if (function)
 		function(message, session);
@@ -137,16 +141,17 @@ void CommandLexer::login(BabelString &message, ServerSession *session)
 		sendAnswer("OK", session);
 	};
 
-	BabelString args(((Command *)message.getData())->data.data + sizeof(CommandIdentifier));
+	auto command = (Command *)message.getData();
+	std::string args(command->data.data + sizeof(CommandIdentifier));
 	auto tokens = tokenize(args);
-	auto username = BabelString((*tokens.begin()).c_str());
+	auto username = BabelString(tokens.begin()->c_str());
 
 	// yeah there isn't any other way, cpp is amazing -victor
 	auto passwordPtr = tokens.begin();
 	BabelString password;
 	passwordPtr++;
 	if (passwordPtr != tokens.end())
-		password = BabelString((*passwordPtr).c_str());
+		password = BabelString(passwordPtr->c_str());
 
 	if (session->hasUser()) {
 		session->getUser()->setName(username);
@@ -175,8 +180,8 @@ void CommandLexer::login(BabelString &message, ServerSession *session)
 	}
 }
 
-CommandLexer::Tokens CommandLexer::tokenize(BabelString &toTokenize)
+CommandLexer::Tokens CommandLexer::tokenize(std::string &toTokenize)
 {
 	boost::char_separator<char> separator(" \t");
-	return Tokens(std::string(toTokenize.getData()), separator);
+	return Tokens(toTokenize, separator);
 }
