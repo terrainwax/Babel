@@ -15,7 +15,7 @@
 class Packet {
 public:
 	static const unsigned char header_length = 2;
-	static const unsigned short max_body_length = 1024;
+	static const unsigned short max_body_length = 2048;
 
 	Packet();
 

@@ -32,7 +32,7 @@ public:
 	static SessionPointer create(Server &_server, boost::asio::io_context& io_context);
 	tcp::socket& getSocket();
 	void open();
-	void deliver(const Packet &msg);
+	void deliver(const BabelString &message);
 	bool hasUser() const;
 	void setUser(User *user);
 	User *getUser() const;
@@ -48,7 +48,6 @@ private:
 	void handleReadHeader(const boost::system::error_code &error, size_t bytes);
 	void startReadBody();
 	void handleReadBody(const boost::system::error_code &error, size_t bytes);
-	void deliverString(BabelString string);
 
 	Server &_server;
 	tcp::socket _socket;
@@ -56,6 +55,7 @@ private:
 	PacketQueue _writeMessageQueue;
 	User *_user;
 	ServerCrypto _crypto;
+	bool _secured;
 };
 
 std::ostream& operator<<(std::ostream& os, const ServerSession& session);

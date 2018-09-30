@@ -8,7 +8,7 @@
 #include <iostream>
 #include "ServerSession.h"
 
-ServerSession::ServerSession(Server &server, boost::asio::io_context &io_context) : _server(server),_socket(io_context), _user(nullptr), _crypto()
+ServerSession::ServerSession(Server &server, boost::asio::io_context &io_context) : _server(server),_socket(io_context), _user(nullptr), _crypto(), _secured(false)
 {
 
 }
@@ -41,11 +41,7 @@ void ServerSession::sendRSAPublicKey()
 
     std::cout << "Sending RSA Public Key:\n'" << key << "'" << std::endl;
 
-	Packet packet;
-	packet.bodyLength(key.getSize());
-	std::memcpy(packet.body(), key.getData(), packet.bodyLength());
-	packet.encodeHeader();
-	deliver(packet);
+	deliver(key);
 }
 
 bool ServerSession::hasUser() const
@@ -94,24 +90,31 @@ void ServerSession::startReadBody()
 void ServerSession::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
 	if (!error) {
-	    if (_readMsg.str().substr(0, 18) == "ENCRYPTED AES KEY:")
-        {
-	        BabelString encryptedAESKey = _readMsg.str().substr(18, _readMsg.str().getSize() - 18);
+		if (!_secured) {
+			if (_readMsg.str().substr(0, 18) == "ENCRYPTED AES KEY:") {
+				BabelString encryptedAESKey = _readMsg.str().substr(18, _readMsg.str().getSize() - 18);
 
-	        _crypto.setAESKey(_crypto.decryptRSA(encryptedAESKey));
+				_crypto.setAESKey(_crypto.decryptRSA(encryptedAESKey));
 
-	        std::cout << "Received Encrypted AES Key: " << _crypto.getAESKey() << std::endl;
-        }
-        else if (_readMsg.str().substr(0, 17) == "ENCRYPTED AES IV:")
-        {
-            BabelString encryptedAESIv = _readMsg.str().substr(17, _readMsg.str().getSize() - 17);
+				std::cout << "Received Encrypted AES Key: " << _crypto.getAESKey() << std::endl;
+			}
+			if (_readMsg.str().substr(0, 17) == "ENCRYPTED AES IV:") {
+				BabelString encryptedAESIv = _readMsg.str().substr(17, _readMsg.str().getSize() - 17);
 
-            _crypto.setAESIv(_crypto.decryptRSA(encryptedAESIv));
+				_crypto.setAESIv(_crypto.decryptRSA(encryptedAESIv));
 
-            std::cout << "Received Encrypted AES Iv: " << _crypto.getAESIv() << std::endl;
-        }
+				std::cout << "Received Encrypted AES Iv: " << _crypto.getAESIv() << std::endl;
+
+				std::cout << "Channel Secured." << std::endl;
+
+				_secured = true;
+			}
+		}
         else
-		    _server.getLexer().parse(_readMsg, this);
+		{
+        	BabelString decrypted = _crypto.decryptAES(_readMsg.str());
+			_server.getLexer().parse(decrypted, this);
+		}
 		startReadHeader();
 	} else {
 		if (hasUser())
@@ -143,16 +146,6 @@ void ServerSession::handleWrite(const boost::system::error_code &error, size_t b
 	}
 }
 
-void ServerSession::deliver(const Packet &msg)
-{
-	bool write_in_progress = !_writeMessageQueue.empty();
-	_writeMessageQueue.push_back(msg);
-
-	if (!write_in_progress) {
-		startWrite();
-	}
-}
-
 std::ostream& operator<<(std::ostream& os, const ServerSession& session)
 {
 	os << session.getAddress();
@@ -165,12 +158,22 @@ std::ostream& operator<<(std::ostream& os, const ServerSession& session)
 	return os;
 }
 
-void ServerSession::deliverString(BabelString string)
+void ServerSession::deliver(const BabelString &message)
 {
-	Packet packet;
+	BabelString data = message;
 
-	packet.bodyLength(string.getSize());
-	std::memcpy(packet.body(), string.getData(), packet.bodyLength());
+	if (_secured)
+		data = _crypto.encryptAES(message);
+
+	Packet packet;
+	packet.bodyLength(data.getSize());
+	std::memcpy(packet.body(), data.getData(), packet.bodyLength());
 	packet.encodeHeader();
-	deliver(packet);
+
+	bool write_in_progress = !_writeMessageQueue.empty();
+	_writeMessageQueue.push_back(packet);
+
+	if (!write_in_progress) {
+		startWrite();
+	}
 }

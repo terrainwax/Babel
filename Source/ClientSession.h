@@ -49,6 +49,7 @@ private:
 	Packet _readMsg;
 	PacketQueue _writeMessageQueue;
 	ClientCrypto _crypto;
+	bool _secured;
 };
 
 std::ostream& operator<<(std::ostream& os, const ClientSession& session);

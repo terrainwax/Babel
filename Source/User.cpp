@@ -30,7 +30,7 @@ const BabelString &User::getPassword() const
 void User::addSession(ServerSessionPointer session) {
 	_sessions.insert(session);
 	for (auto message: _recentMessageQueue)
-		session->deliver(message.getPacket());
+		session->deliver(message.getContent());
 }
 
 void User::removeSession(ServerSessionPointer session) {
@@ -44,7 +44,7 @@ void User::transmit(const Message &message) {
 		_recentMessageQueue.pop_front();
 
 	for (auto session: _sessions)
-		session->deliver(message.getPacket());
+		session->deliver(message.getContent());
 }
 
 bool User::getStatus() const

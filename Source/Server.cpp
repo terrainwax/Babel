@@ -26,7 +26,7 @@ void Server::broadcast(Message message)
     std::cout << "Broadcasting message: " << message << std::endl;
 
     for (auto session: _sessions)
-        session->deliver(message.getPacket());
+        session->deliver(message.getContent());
 }
 
 User *Server::getUser(const BabelString &name) {

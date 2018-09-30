@@ -5,20 +5,21 @@
 #ifndef CPP_BABEL_2018_MESSAGE_H
 #define CPP_BABEL_2018_MESSAGE_H
 
-#include "Packet.h"
+#include <deque>
+#include "BabelString.h"
 
 class ServerSession;
 
 class Message {
 public:
-    Message(Packet packer, ServerSession *sender);
+    Message(BabelString content, ServerSession *sender);
 
-    Packet getPacket() const;
+    BabelString getContent() const;
     ServerSession *getSender() const;
     bool hasSender() const;
 
 private:
-    Packet _packet;
+    BabelString _content;
     ServerSession *_sender;
 };
 

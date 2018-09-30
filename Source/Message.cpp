@@ -5,15 +5,15 @@
 #include "Message.h"
 
 
-Message::Message(Packet packet, ServerSession *sender)
-    : _packet(packet), _sender(sender)
+Message::Message(BabelString content, ServerSession *sender)
+    : _content(content), _sender(sender)
 {
 
 }
 
-Packet Message::getPacket() const
+BabelString Message::getContent() const
 {
-    return _packet;
+    return _content;
 }
 
 bool Message::hasSender() const
@@ -28,7 +28,7 @@ ServerSession *Message::getSender() const
 
 std::ostream& operator<<(std::ostream& os, const Message& message)
 {
-    os << "'" << BabelString(message.getPacket().body(), message.getPacket().bodyLength()) << "'";
+    os << "'" << message.getContent() << "'";
 
     if (message.hasSender())
         os << " from " << *message.getSender();

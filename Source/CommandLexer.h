@@ -11,7 +11,7 @@
 #include <map>
 #include <functional>
 #include <boost/tokenizer.hpp>
-#include "Packet.h"
+#include "BabelString.h"
 #include "Command.h"
 
 #define ko()	{ sendAnswer("KO", session); return; }
@@ -24,24 +24,24 @@ public:
 	explicit CommandLexer(Server &server);
 	~CommandLexer() = default;
 
-	void parse(Packet &packet, ServerSession *session);
+	void parse(BabelString &message, ServerSession *session);
 private:
 	typedef boost::tokenizer<boost::char_separator<char>> Tokens;
 
 	void sendAnswer(BabelString answer, ServerSession *session);
 	Tokens tokenize(BabelString &toTokenize);
 
-	void login(Packet &packet, ServerSession *session);
-	void online(Packet &packet, ServerSession *session);
-	void offline(Packet &packet, ServerSession *session);
-	void host(Packet &packet, ServerSession *session);
-	void call(Packet &packet, ServerSession *session);
-	void hang(Packet &packet, ServerSession *session);
-	void alive(Packet &packet, ServerSession *session);
-	void list(Packet &packet, ServerSession *session);
+	void login(BabelString &message, ServerSession *session);
+	void online(BabelString &message, ServerSession *session);
+	void offline(BabelString &message, ServerSession *session);
+	void host(BabelString &message, ServerSession *session);
+	void call(BabelString &message, ServerSession *session);
+	void hang(BabelString &message, ServerSession *session);
+	void alive(BabelString &message, ServerSession *session);
+	void list(BabelString &message, ServerSession *session);
 
 	Server &_server;
-	std::map<CommandIdentifier, std::function<void(Packet &, ServerSession *)>> _functionMap;
+	std::map<CommandIdentifier, std::function<void(BabelString &, ServerSession *)>> _functionMap;
 };
 
 #include "Server.h"

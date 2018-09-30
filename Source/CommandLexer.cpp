@@ -20,27 +20,22 @@ CommandLexer::CommandLexer(Server &server) : _server(server)
 	_functionMap[CommandIdentifier::LIST] = std::bind(&CommandLexer::list, this, std::placeholders::_1, std::placeholders::_2);
 }
 
-void CommandLexer::parse(Packet &packet, ServerSession *session)
+void CommandLexer::parse(BabelString &message, ServerSession *session)
 {
-	auto command = (Command *) packet.body();
+	auto command = (Command *) message.getData();
 	auto function = _functionMap[command->data.id];
 	if (function)
-		function(packet, session);
+		function(message, session);
 	else
 		ko();
 }
 
 void CommandLexer::sendAnswer(BabelString answer, ServerSession *session)
 {
-	Packet packet;
-
-	packet.bodyLength(answer.getSize());
-	std::memcpy(packet.body(), answer.getData(), packet.bodyLength());
-	packet.encodeHeader();
-	session->deliver(packet);
+	session->deliver(answer);
 }
 
-void CommandLexer::online(Packet &packet, ServerSession *session)
+void CommandLexer::online(BabelString &message, ServerSession *session)
 {
 	if (!session->hasUser())
 	ko();
@@ -74,7 +69,7 @@ void CommandLexer::online(Packet &packet, ServerSession *session)
 	sendAnswer(BabelString("OK ") + string_id, session);
 }
 
-void CommandLexer::offline(Packet &packet, ServerSession *session)
+void CommandLexer::offline(BabelString &message, ServerSession *session)
 {
 	if (!session->hasUser())
 	ko();
@@ -92,30 +87,30 @@ void CommandLexer::offline(Packet &packet, ServerSession *session)
 	ko();
 }
 
-void CommandLexer::host(Packet &packet, ServerSession *session)
+void CommandLexer::host(BabelString &message, ServerSession *session)
 {
 	sendAnswer("OK", session);
 	session->getUser()->setStatus(false);
 }
 
-void CommandLexer::call(Packet &packet, ServerSession *session)
+void CommandLexer::call(BabelString &message, ServerSession *session)
 {
 	sendAnswer("OK", session);
 	session->getUser()->setStatus(false);
 }
 
-void CommandLexer::hang(Packet &packet, ServerSession *session)
+void CommandLexer::hang(BabelString &message, ServerSession *session)
 {
 	sendAnswer("OK", session);
 	session->getUser()->setStatus(true);
 }
 
-void CommandLexer::alive(Packet &packet, ServerSession *session)
+void CommandLexer::alive(BabelString &message, ServerSession *session)
 {
 	sendAnswer("OK", session);
 }
 
-void CommandLexer::list(Packet &packet, ServerSession *session)
+void CommandLexer::list(BabelString &message, ServerSession *session)
 {
 	BabelString answer("OK");
 
@@ -135,14 +130,14 @@ void CommandLexer::list(Packet &packet, ServerSession *session)
 	sendAnswer(answer, session);
 }
 
-void CommandLexer::login(Packet &packet, ServerSession *session)
+void CommandLexer::login(BabelString &message, ServerSession *session)
 {
 	auto logged_in = [&] (User *user) {
 		std::cout << "User " << user->getName() << " logged in." << std::endl;
 		sendAnswer("OK", session);
 	};
 
-	BabelString args(((Command *)packet.body())->data.data + sizeof(CommandIdentifier));
+	BabelString args(((Command *)message.getData())->data.data + sizeof(CommandIdentifier));
 	auto tokens = tokenize(args);
 	auto username = BabelString((*tokens.begin()).c_str());
 
