@@ -24,14 +24,14 @@ void CommonCrypto::initialize()
 
     EVP_CipherInit_ex(_encryptContextAES, EVP_aes_256_cbc(), NULL, NULL, NULL, 1);
 
-    _aesKey = BabelString('\0', EVP_CIPHER_CTX_key_length(_encryptContextAES));
-    _aesIv = BabelString('\0', EVP_CIPHER_CTX_iv_length(_encryptContextAES));
+    _aesKey = BabelString('A', EVP_CIPHER_CTX_key_length(_encryptContextAES));
+    _aesIv = BabelString('A', EVP_CIPHER_CTX_iv_length(_encryptContextAES));
 }
 
 BabelString CommonCrypto::encryptAES(const BabelString &message)
 {
     size_t blockLength = 0;
-    size_t encryptedMessageLength;
+    size_t encryptedMessageLength = 0;
 
     char encryptedMessageBuffer[message.getSize() + AES_BLOCK_SIZE];
 

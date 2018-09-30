@@ -17,6 +17,7 @@
 #include "BabelString.h"
 #include "CryptoException.h"
 
+#define RSA_PADDING RSA_PKCS1_PADDING
 #define RSA_KEYLEN 2048
 
 class CommonCrypto {

@@ -15,18 +15,16 @@ class ServerCrypto: public CommonCrypto {
     ServerCrypto();
     ~ServerCrypto();
 
-    BabelString decryptRSA(const BabelString &encryptedMessage, const BabelString &encryptionKey, const BabelString &encryptionIv);
+    BabelString decryptRSA(const BabelString &encryptedMessage);
 
     BabelString getLocalPublicKey();
     BabelString getLocalPrivateKey();
 
   private:
-    EVP_PKEY *_localKeyPairRSA;
-
-    EVP_CIPHER_CTX *_decryptContextRSA;
+    RSA *_localKeyPairRSA;
 
     void initialize();
-    void generateRsaKeypair();
+    void generateRsaKeyPair();
 };
 
 #endif

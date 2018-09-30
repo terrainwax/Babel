@@ -37,11 +37,9 @@ void ServerSession::open() {
 
 void ServerSession::sendRSAPublicKey()
 {
-	std::cout << "Sending RSA Public Key." << std::endl;
-
 	BabelString key = _crypto.getLocalPublicKey();
 
-	std::cout << "'" << key << "'" << std::endl;
+    std::cout << "Sending RSA Public Key:\n'" << key << "'" << std::endl;
 
 	Packet packet;
 	packet.bodyLength(key.getSize());
@@ -96,7 +94,24 @@ void ServerSession::startReadBody()
 void ServerSession::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
 	if (!error) {
-		_server.getLexer().parse(_readMsg, this);
+	    if (_readMsg.str().substr(0, 18) == "ENCRYPTED AES KEY:")
+        {
+	        BabelString encryptedAESKey = _readMsg.str().substr(18, _readMsg.str().getSize() - 18);
+
+	        _crypto.setAESKey(_crypto.decryptRSA(encryptedAESKey));
+
+	        std::cout << "Received Encrypted AES Key: " << _crypto.getAESKey() << std::endl;
+        }
+        else if (_readMsg.str().substr(0, 17) == "ENCRYPTED AES IV:")
+        {
+            BabelString encryptedAESIv = _readMsg.str().substr(17, _readMsg.str().getSize() - 17);
+
+            _crypto.setAESIv(_crypto.decryptRSA(encryptedAESIv));
+
+            std::cout << "Received Encrypted AES Iv: " << _crypto.getAESIv() << std::endl;
+        }
+        else
+		    _server.getLexer().parse(_readMsg, this);
 		startReadHeader();
 	} else {
 		if (hasUser())

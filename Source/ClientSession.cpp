@@ -64,35 +64,31 @@ void ClientSession::startReadBody()
 void ClientSession::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
     if (!error) {
-        if (_readMsg.str().substr(0, 26) == "-----BEGIN PUBLIC KEY-----")
+        if (_readMsg.str().substr(0, 30) == "-----BEGIN RSA PUBLIC KEY-----")
         {
-            std::cout << "Received RSA Public Key From Server." << std::endl;
-
             const BabelString RSAPublicKey = _readMsg.str();
             _crypto.setRemotePublicKey(RSAPublicKey);
 
-            /*
-            BabelString encryptionKey = BabelString();
-            BabelString encryptionIv = BabelString();
+            std::cout << "Received RSA Public Key:\n'" << _crypto.getRemotePublicKey() << "'" << std::endl;
 
-            BabelString homo = _crypto.getAESKey();
+            BabelString aesKey = _crypto.getAESKey();
 
-            std::cout << "Hello: " << homo << std::endl;
+            std::cout << "Sending Encrypted AES Key: " << aesKey << std::endl;
 
-            BabelString encryptedAESKey = _crypto.encryptRSA(homo, encryptionKey, encryptionIv);
+            BabelString encryptedAESKey = _crypto.encryptRSA(aesKey);
 
-            deliver(encryptionKey);
-            deliver(encryptionIv);
-            deliver(encryptedAESKey);
+            deliver(BabelString("ENCRYPTED AES KEY:") + encryptedAESKey);
 
-            BabelString encryptedAESIv = _crypto.encryptRSA(_crypto.getAESIv(), encryptionKey, encryptionIv);
+            BabelString aesIv = _crypto.getAESIv();
 
-            deliver(encryptionKey);
-            deliver(encryptionIv);
-            deliver(encryptedAESIv);
-             */
+            std::cout << "Sending Encrypted AES Iv: " << aesIv << std::endl;
+
+            BabelString encryptedAESIv = _crypto.encryptRSA(aesIv);
+
+            deliver(BabelString("ENCRYPTED AES IV:") + encryptedAESIv);
         }
-        _client.display(Message(_readMsg, nullptr));
+        else
+            _client.display(Message(_readMsg, nullptr));
         startReadHeader();
     } else {
         //if (hasUser())

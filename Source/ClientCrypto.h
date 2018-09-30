@@ -8,15 +8,13 @@ public:
     ClientCrypto();
     ~ClientCrypto();
 
-    BabelString encryptRSA(const BabelString &message, BabelString &encryptionKey, BabelString &encryptionIv);
+    BabelString encryptRSA(const BabelString &message);
 
     BabelString getRemotePublicKey();
     void setRemotePublicKey(const BabelString &publicKey);
 
 private:
-    EVP_PKEY *_remotePublicKeyRSA;
-
-    EVP_CIPHER_CTX *_encryptContextRSA;
+    RSA *_remotePublicKeyRSA;
 
     void initialize();
     void generateAesKey();
