@@ -43,7 +43,7 @@ void ServerSession::sendRSAPublicKey()
 {
 	BabelString key = _crypto.getLocalPublicKey();
 
-    std::cout << "Sending RSA Public Key:\n'" << key << "'" << std::endl;
+    std::cout << "Sending RSA Public Key:" << std::endl << key << std::endl;
 
 	deliver(key);
 }

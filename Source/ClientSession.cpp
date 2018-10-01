@@ -74,7 +74,7 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
                 const BabelString RSAPublicKey = _readMsg.str();
                 _crypto.setRemotePublicKey(RSAPublicKey);
 
-                std::cout << "Received RSA Public Key:\n'" << _crypto.getRemotePublicKey() << "'" << std::endl;
+                std::cout << "Received RSA Public Key:" << std::endl << _crypto.getRemotePublicKey() << std::endl;
 
                 BabelString aesKey = _crypto.getAESKey();
 
