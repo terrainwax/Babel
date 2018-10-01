@@ -137,7 +137,7 @@ void CommandLexer::list(BabelString &message, ServerSession *session)
 void CommandLexer::login(BabelString &message, ServerSession *session)
 {
 	auto logged_in = [&] (User *user) {
-		Logger::get()->debug(BabelString("User '") + user->getName() + BabelString("' Is Connected"));
+		Logger::get()->debug(BabelString("User ") + user->getName() + BabelString(" Is Connected"));
 		sendAnswer("OK", session);
 	};
 
