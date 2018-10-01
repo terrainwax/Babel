@@ -8,9 +8,10 @@
 #include <set>
 #include <cstdlib>
 #include <deque>
-#include <iostream>
 #include <thread>
 #include <boost/asio.hpp>
+
+#include "Logger.h"
 #include "Packet.h"
 
 using boost::asio::ip::tcp;

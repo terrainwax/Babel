@@ -66,6 +66,12 @@ int main_client(int argc, char *argv[]) {
 		std::string line;
 		while (std::getline(std::cin, line)) {
 
+		    if (line == "exit")
+            {
+		        client.stop();
+		        exit(0);
+            }
+
 			Command command = {0};
 			command.magic = COMMAND_MAGIC;
 			command.data.id = (CommandIdentifier) std::stoi(line);
@@ -99,15 +105,17 @@ int main_server(int argc, char *argv[]) {
 
 		//sleep(1);
 
-		char line[Packet::max_body_length + 1];
-		while (std::cin.getline(line, Packet::max_body_length + 1)) {
-			Packet packet;
-			packet.bodyLength(std::strlen(line));
-			std::memcpy(packet.body(), line, packet.bodyLength());
-			packet.encodeHeader();
-			std::cout << line << std::endl;
-			//server.broadcast(Message(packet, nullptr));
+        std::string line;
+		while (std::getline(std::cin, line)) {
+
+            if (line == "exit")
+            {
+                server.stop();
+                exit(0);
+            }
 		}
+
+		server.stop();
 	}
 	catch (std::exception &e) {
 		std::cerr << "Exception: " << e.what() << "\n";

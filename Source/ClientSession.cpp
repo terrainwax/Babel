@@ -30,8 +30,13 @@ BabelString ClientSession::getAddress() const
 }
 
 void ClientSession::open() {
-    std::cout << "ClientSession opened: " << getAddress() << std::endl;
+    Logger::get()->debug(BabelString("ClientSession Opened: ") + getAddress());
     startReadHeader();
+}
+
+void ClientSession::close() {
+    Logger::get()->debug(BabelString("ClientSession Closed: ") + getAddress());
+    _socket.close();
 }
 
 void ClientSession::startReadHeader()
@@ -73,7 +78,7 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
 
                 BabelString aesKey = _crypto.getAESKey();
 
-                std::cout << "Received Encrypted AES Key: ";
+                std::cout << "Sending Encrypted AES Key: ";
 
                 for (int i = 0; i < aesKey.getSize(); ++i)
                     std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesKey.getData()[i];
@@ -86,7 +91,7 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
 
                 BabelString aesIv = _crypto.getAESIv();
 
-                std::cout << "Received Encrypted AES Iv: ";
+                std::cout << "Sending Encrypted AES Iv: ";
 
                 for (int i = 0; i < aesIv.getSize(); ++i)
                     std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesIv.getData()[i];
@@ -97,7 +102,7 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
 
                 deliver(BabelString("ENCRYPTED AES IV:") + encryptedAESIv);
 
-                std::cout << "Channel Secured." << std::endl;
+                Logger::get()->debug(BabelString("ClientSession Secured: ") + getAddress());
 
                 _secured = true;
             }

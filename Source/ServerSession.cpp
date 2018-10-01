@@ -29,10 +29,14 @@ BabelString ServerSession::getAddress() const
 }
 
 void ServerSession::open() {
-	std::cout << "ServerSession opened: " << getAddress() << std::endl;
+    Logger::get()->debug(BabelString("ServerSession Opened: ") + getAddress());
 	sendRSAPublicKey();
-	//receiveAESKey();
 	startReadHeader();
+}
+
+void ServerSession::close() {
+	Logger::get()->debug(BabelString("ServerSession Closed: ") + getAddress());
+	_socket.close();
 }
 
 void ServerSession::sendRSAPublicKey()
@@ -119,7 +123,7 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 
 				std::cout << std::endl;
 
-				std::cout << "Channel Secured." << std::endl;
+                Logger::get()->debug(BabelString("ServerSession Secured: ") + getAddress());
 
 				_secured = true;
 			}

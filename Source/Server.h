@@ -7,8 +7,9 @@
 
 #include <set>
 #include <thread>
-#include <iostream>
 #include <boost/asio/ip/tcp.hpp>
+
+#include "Logger.h"
 #include "CommandLexer.h"
 
 using boost::asio::ip::tcp;

@@ -12,13 +12,24 @@ _acceptor(_io_context, _endpoint), _lexer(*this)
 
 void Server::start()
 {
-    std::cout << "Server started." << std::endl;
-    _mainThread = std::thread([this]() { _io_context.run(); });
+    Logger::get()->debug("Server Started");
+    _mainThread = std::thread([this]() {
+        try {
+            _io_context.run();
+        } catch (std::exception &e) {
+            Logger::get()->error("Server Crashed. An Error Occured.");
+            exit(1);
+        }
+    });
 }
 
 void Server::stop() {
-    //_io_context.post([this]() { _socket.stop(); });
+    for (auto session: _sessions)
+        session->close();
+
     _mainThread.join();
+
+    Logger::get()->debug("Server Stopped");
 }
 
 void Server::broadcast(Message message)
@@ -40,7 +51,7 @@ User *Server::getUser(const BabelString &name) {
 }
 
 User *Server::newUser(const BabelString &name) {
-    std::cout << "New user : " << name << std::endl;
+    Logger::get()->debug(BabelString("New User Created: ") + name);
 
     UserPointer user = User::create(*this, name);
     _users.insert(user);

@@ -33,6 +33,7 @@ public:
 	static SessionPointer create(Server &_server, boost::asio::io_context& io_context);
 	tcp::socket& getSocket();
 	void open();
+	void close();
 	void deliver(const BabelString &message);
 	bool hasUser() const;
 	void setUser(User *user);

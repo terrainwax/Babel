@@ -15,12 +15,12 @@ Client::Client(const BabelString &address,
 
 void Client::start()
 {
-	std::cout << "Client started." << std::endl;
+    Logger::get()->debug("Client Started");
 	_mainThread = std::thread([this]() {
 		try {
 			_io_context.run();
 		} catch (std::exception &e) {
-			std::cout << std::endl << "An error occurred." << std::endl;
+            Logger::get()->error("Client Crashed. An Error Occured.");
 			exit(1);
 		}
 	});
@@ -55,8 +55,12 @@ void Client::write(const BabelString &message) {
 }
 
 void Client::stop() {
-	//_io_context.post([this]() { _socket.stop(); });
+	for (auto session: _sessions)
+		session->close();
+
 	_mainThread.join();
+
+	Logger::get()->debug("Client Stopped");
 }
 
 
