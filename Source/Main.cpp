@@ -63,6 +63,9 @@ int main_client(int argc, char *argv[]) {
 		nameMsg.encodeHeader();
 		client.write(nameMsg);*/
 
+		sleep(1);
+        std::cout << "$> ";
+
 		std::string line;
 		while (std::getline(std::cin, line)) {
 
@@ -81,6 +84,9 @@ int main_client(int argc, char *argv[]) {
 			std::memcpy((char *)command.data.data + sizeof(CommandIdentifier), line.c_str(), line.size());
 
 			client.write(BabelString((char *)&command, sizeof(Command)));
+
+            sleep(1);
+			std::cout << "$> ";
 		}
 
 		client.stop();
@@ -103,7 +109,8 @@ int main_server(int argc, char *argv[]) {
 
 		server.start();
 
-		//sleep(1);
+        sleep(1);
+        std::cout << "$> ";
 
         std::string line;
 		while (std::getline(std::cin, line)) {
@@ -113,6 +120,9 @@ int main_server(int argc, char *argv[]) {
                 server.stop();
                 exit(0);
             }
+
+            sleep(1);
+            std::cout << "$> ";
 		}
 
 		server.stop();
