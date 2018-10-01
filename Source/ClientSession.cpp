@@ -9,24 +9,13 @@
 #include "ClientSession.h"
 
 
-ClientSession::ClientSession(Client &client, boost::asio::io_context &io_context) : _client(client), _socket(io_context), _crypto(), _secured(false)
+ClientSession::ClientSession(Client &client, boost::asio::io_context &io_context) : Session(io_context), _client(client), _crypto()
 {
 }
-
 
 ClientSession::SessionPointer ClientSession::create(Client &client, boost::asio::io_context &io_context)
 {
     return SessionPointer(new ClientSession(client, io_context));
-}
-
-tcp::socket &ClientSession::getSocket()
-{
-    return _socket;
-}
-
-BabelString ClientSession::getAddress() const
-{
-    return BabelString(_socket.remote_endpoint().address().to_string().c_str());
 }
 
 void ClientSession::open() {
@@ -74,7 +63,7 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
                 const BabelString RSAPublicKey = _readMsg.str();
                 _crypto.setRemotePublicKey(RSAPublicKey);
 
-                std::cout << "Received RSA Public Key:" << std::endl << _crypto.getRemotePublicKey() << std::endl;
+                Logger::get()->debug(BabelString("Received RSA Public Key:\n") + _crypto.getRemotePublicKey());
 
                 BabelString aesKey = _crypto.getAESKey();
 
@@ -109,7 +98,7 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
         }
         else {
             BabelString decrypted = _crypto.decryptAES(_readMsg.str());
-            _client.display(Message(decrypted, nullptr));
+            _client.display(Message(decrypted, this));
         }
         startReadHeader();
     } else {
@@ -160,11 +149,4 @@ void ClientSession::deliver(const BabelString &message)
     if (!write_in_progress) {
         startWrite();
     }
-}
-
-std::ostream& operator<<(std::ostream& os, const ClientSession& session)
-{
-    os << session.getAddress();
-
-    return os;
 }

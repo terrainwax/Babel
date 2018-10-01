@@ -5,7 +5,7 @@
 #include "Message.h"
 
 
-Message::Message(BabelString content, ServerSession *sender)
+Message::Message(BabelString content, Session *sender)
     : _content(content), _sender(sender)
 {
 
@@ -21,7 +21,7 @@ bool Message::hasSender() const
     return _sender != nullptr;
 }
 
-ServerSession *Message::getSender() const
+Session *Message::getSender() const
 {
     return _sender;
 }

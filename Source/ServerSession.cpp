@@ -8,7 +8,7 @@
 #include <iostream>
 #include "ServerSession.h"
 
-ServerSession::ServerSession(Server &server, boost::asio::io_context &io_context) : _server(server),_socket(io_context), _user(nullptr), _crypto(), _secured(false)
+ServerSession::ServerSession(Server &server, boost::asio::io_context &io_context) : Session(io_context), _server(server), _user(nullptr), _crypto()
 {
 
 }
@@ -16,16 +16,6 @@ ServerSession::ServerSession(Server &server, boost::asio::io_context &io_context
 ServerSession::SessionPointer ServerSession::create(Server &server, boost::asio::io_context &io_context)
 {
 	return SessionPointer(new ServerSession(server, io_context));
-}
-
-tcp::socket &ServerSession::getSocket()
-{
-	return _socket;
-}
-
-BabelString ServerSession::getAddress() const
-{
-	return BabelString(_socket.remote_endpoint().address().to_string().c_str());
 }
 
 void ServerSession::open() {
@@ -43,7 +33,7 @@ void ServerSession::sendRSAPublicKey()
 {
 	BabelString key = _crypto.getLocalPublicKey();
 
-    std::cout << "Sending RSA Public Key:" << std::endl << key << std::endl;
+    Logger::get()->debug(BabelString("Sending RSA Public Key:\n") + key);
 
 	deliver(key);
 }
@@ -55,7 +45,7 @@ bool ServerSession::hasUser() const
 
 void ServerSession::setUser(User *user)
 {
-	std::cout << "ServerSession from " << getAddress() << " now belongs to user " << user->getName() << std::endl;
+	Logger::get()->debug(BabelString("ServerSession ") + getAddress() + BabelString(" Assigned To ") + user->getName());
 	_user = user;
 	_user->addSession(shared_from_this());
 }
@@ -162,18 +152,6 @@ void ServerSession::handleWrite(const boost::system::error_code &error, size_t b
 		if (hasUser())
 			_user->removeSession(shared_from_this());
 	}
-}
-
-std::ostream& operator<<(std::ostream& os, const ServerSession& session)
-{
-	os << session.getAddress();
-
-	if (session.hasUser())
-		os << "(" << session.getUser()->getName() << ")";
-	else
-		os << "(Unknown)";
-
-	return os;
 }
 
 void ServerSession::deliver(const BabelString &message)

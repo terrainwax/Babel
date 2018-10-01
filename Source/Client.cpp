@@ -46,7 +46,7 @@ void Client::handleConnect(ClientSession::SessionPointer session,
 
 void Client::display(Message message)
 {
-	std::cout << "Received message: " << message << std::endl;
+	Logger::get()->debug(BabelString("Received Message: '") + message.getContent() + BabelString("' From ") + message.getSender()->getAddress());
 }
 
 void Client::write(const BabelString &message) {

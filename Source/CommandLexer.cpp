@@ -124,7 +124,7 @@ void CommandLexer::list(BabelString &message, ServerSession *session)
 			continue;
 		char line[1024];
 		std::snprintf(line, 1024, "\n%s#%03u %s", user->getName().getData(),
-			user->getID(), user->getStatus() ? "available" : "busy");
+			user->getID(), user->getStatus() ? "Available" : "Busy");
 		answer.append(line);
 	}
 
@@ -137,7 +137,7 @@ void CommandLexer::list(BabelString &message, ServerSession *session)
 void CommandLexer::login(BabelString &message, ServerSession *session)
 {
 	auto logged_in = [&] (User *user) {
-		std::cout << "User " << user->getName() << " logged in." << std::endl;
+		Logger::get()->debug(BabelString("User '") + user->getName() + BabelString("' Is Connected"));
 		sendAnswer("OK", session);
 	};
 

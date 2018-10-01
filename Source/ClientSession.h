@@ -10,12 +10,8 @@
 
 #include <deque>
 #include <iomanip>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/algorithm/string.hpp>
 
+#include "Session.h"
 #include "BabelString.h"
 #include "Packet.h"
 #include "ClientCrypto.h"
@@ -24,17 +20,15 @@ using boost::asio::ip::tcp;
 
 class Client;
 
-class ClientSession : public boost::enable_shared_from_this<ClientSession>
+class ClientSession : public boost::enable_shared_from_this<ClientSession>, public Session
 {
 public:
 	typedef boost::shared_ptr<ClientSession> SessionPointer;
 
 	static SessionPointer create(Client &_client, boost::asio::io_context& io_context);
-	tcp::socket& getSocket();
 	void open();
 	void close();
 	void deliver(const BabelString &message);
-	BabelString getAddress() const;
 
 private:
 
@@ -47,14 +41,10 @@ private:
 	void handleReadBody(const boost::system::error_code &error, size_t bytes);
 
 	Client &_client;
-	tcp::socket _socket;
 	Packet _readMsg;
 	PacketQueue _writeMessageQueue;
 	ClientCrypto _crypto;
-	bool _secured;
 };
-
-std::ostream& operator<<(std::ostream& os, const ClientSession& session);
 
 #include "Client.h"
 #include "User.h"

@@ -8,25 +8,25 @@
 #include <deque>
 #include "BabelString.h"
 
-class ServerSession;
+class Session;
 
 class Message {
 public:
-    Message(BabelString content, ServerSession *sender);
+    Message(BabelString content, Session *sender);
 
     BabelString getContent() const;
-    ServerSession *getSender() const;
+    Session *getSender() const;
     bool hasSender() const;
 
 private:
     BabelString _content;
-    ServerSession *_sender;
+    Session *_sender;
 };
 
 std::ostream& operator<<(std::ostream& os, const Message& message);
 
 typedef std::deque<Message> MessageQueue;
 
-#include "ServerSession.h"
+#include "Session.h"
 
 #endif //CPP_BABEL_2018_MESSAGE_H
