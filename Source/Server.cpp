@@ -23,8 +23,10 @@ void Server::start()
 }
 
 void Server::stop() {
-    for (auto session: _sessions)
-        session->close();
+    for (auto session: _sessions) {
+        if (session->isActive())
+            session->close();
+    }
 
     _io_context.stop();
     _mainThread.join();

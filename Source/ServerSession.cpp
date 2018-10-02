@@ -26,6 +26,8 @@ void ServerSession::open() {
 }
 
 void ServerSession::close() {
+	if (hasUser())
+		_user->removeSession(shared_from_this());
 	Logger::get()->debug(BabelString("ServerSession Closed: ") + getAddress());
 	Session::close();
 }
@@ -69,8 +71,6 @@ void ServerSession::handleReadHeader(const boost::system::error_code &error, siz
 	if (!error && _readMsg.decodeHeader()) {
 		startReadBody();
 	} else {
-		if (hasUser())
-			_user->removeSession(shared_from_this());
 		close();
 	}
 }
@@ -127,8 +127,6 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 		}
 		startReadHeader();
 	} else {
-		if (hasUser())
-			_user->removeSession(shared_from_this());
 		close();
 	}
 }
@@ -152,8 +150,6 @@ void ServerSession::handleWrite(const boost::system::error_code &error, size_t b
 			startWrite();
 		}
 	} else {
-		if (hasUser())
-			_user->removeSession(shared_from_this());
 		close();
 	}
 }
