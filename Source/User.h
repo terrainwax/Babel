@@ -49,8 +49,6 @@ public:
 	void setPassword(const BabelString &password);
 	Status getStatus() const;
 	void setStatus(User::Status status);
-	unsigned char getID() const;
-	void setID(unsigned char id);
 
 private:
 	explicit User(Server &_server, const BabelString &name);
@@ -65,7 +63,6 @@ private:
 	BabelString _name;
 	BabelString _password;
 	Status _status;
-	unsigned char _id;
 };
 
 #include "Server.h"

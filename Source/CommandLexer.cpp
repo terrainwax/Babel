@@ -5,6 +5,7 @@
 ** CommandLexer.cpp
 */
 
+#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include "CommandLexer.h"
 
@@ -44,33 +45,14 @@ void CommandLexer::online(BabelString &message, ServerSession *session)
 	if (!session->hasUser())
 	ko();
 
-	std::vector<User *> _sameUsernameUsers;
-
-	for (auto user : _server.getOnlineUsers())
-	{
-		if (user == session->getUser())
-		ko();
-		if (user->getName() == session->getUser()->getName())
-			_sameUsernameUsers.emplace_back(user);
-	}
-
-	auto isTaken = [&](unsigned char id) -> bool {
-		for (auto user : _sameUsernameUsers)
-			if (user->getID() == id)
-				return true;
-		return false;
-	};
-
-	unsigned char id = 1;
-	for (; id < UCHAR_MAX && isTaken(id); id++);
-	if (id == UCHAR_MAX)
-		ko();
-
-	session->getUser()->setID(id);
+	for (const auto &user : _server.getOnlineUsers())
+		if (session->getUser() == user)
+		{
+			sendAnswer("OK", session);
+			return;
+		}
 	_server.getOnlineUsers().emplace_back(session->getUser());
-	char string_id[4] = {0};
-	std::snprintf(string_id, 4, "%03u", id);
-	sendAnswer(BabelString("OK ") + string_id, session);
+	sendAnswer("OK", session);
 }
 
 void CommandLexer::offline(BabelString &message, ServerSession *session)
@@ -93,6 +75,9 @@ void CommandLexer::offline(BabelString &message, ServerSession *session)
 
 void CommandLexer::host(BabelString &message, ServerSession *session)
 {
+	if (!session->hasUser())
+	ko();
+
 	if (session->getUser()->getStatus() != User::Status::BUSY)
 		ko();
 
@@ -102,6 +87,9 @@ void CommandLexer::host(BabelString &message, ServerSession *session)
 
 void CommandLexer::call(BabelString &message, ServerSession *session)
 {
+	if (!session->hasUser())
+	ko();
+
 	if (session->getUser()->getStatus() != User::Status::AVAILABLE)
 		ko();
 
@@ -112,18 +100,33 @@ void CommandLexer::call(BabelString &message, ServerSession *session)
 	auto usernamePtr = tokens.begin();
 	if (usernamePtr == tokens.end())
 		ko();
-	auto UIDToCall = BabelString(usernamePtr->c_str());
+	auto username = BabelString(usernamePtr->c_str());
 	usernamePtr++;
 	if (usernamePtr == tokens.end())
 		ko();
 	auto portString = BabelString(usernamePtr->c_str());
+	try {
+		auto port = boost::lexical_cast<unsigned short>(portString.getData());
+	} catch (const boost::bad_lexical_cast &e)
+		ko();
+	auto user = _server.getUser(username);
+	if (user->getStatus() != User::Status::AVAILABLE)
+		ko();
 
+	auto answerMessage = Message(BabelString("CALL ")
+		+ session->getUser()->getName() + " " +
+		session->getAddress() + " " + portString, session);
+	user->transmit(answerMessage);
 	sendAnswer("OK", session);
 	session->getUser()->setStatus(User::Status::BUSY);
+	user->setStatus(User::Status::BUSY);
 }
 
 void CommandLexer::hang(BabelString &message, ServerSession *session)
 {
+	if (!session->hasUser())
+	ko();
+
 	if (session->getUser()->getStatus() == User::Status::AVAILABLE)
 		ko();
 
@@ -138,6 +141,9 @@ void CommandLexer::alive(BabelString &message, ServerSession *session)
 
 void CommandLexer::list(BabelString &message, ServerSession *session)
 {
+	if (!session->hasUser())
+	ko();
+
 	BabelString answer("OK");
 
 	for (auto user : _server.getOnlineUsers())
@@ -145,13 +151,12 @@ void CommandLexer::list(BabelString &message, ServerSession *session)
 		if (user == session->getUser())
 			continue;
 		char line[1024];
-		std::snprintf(line, 1024, "\n%s#%03u %s", user->getName().getData(),
-			user->getID(), user->getStatus() ? "Available" : "Busy");
+		std::snprintf(line, 1024, "\n%s %s", user->getName().getData(),
+			user->getStatus() == User::Status::AVAILABLE ? "Available"
+			: user->getStatus() == User::Status::BUSY ? "Busy"
+			: "Hosting");
 		answer.append(line);
 	}
-
-	if (answer.getSize() != BabelString("OK").getSize())
-		answer.append("\n");
 
 	sendAnswer(answer, session);
 }
