@@ -2,8 +2,17 @@
 boost/1.68.0@conan/stable
 portaudio/v190600.20161030@bincrafters/stable
 opus/1.2.1@bincrafters/stable
-Qt/5.11.1@bincrafters/stable
-OpenSSL/1.1.0g@conan/stable
+Qt/5.11.2@bincrafters/stable
+OpenSSL/1.0.2o@conan/stable
+
+[options]
+Qt:shared=True # false
+# On Windows, you can choose the opengl mode, default is 'desktop'
+Qt:opengl=desktop # dynamic
+# If you need specific Qt modules, you can add them as follow:
+Qt:qtmultimedia=True
+Qt:qtgraphicaleffects=True
 
 [generators]
+txt
 cmake
