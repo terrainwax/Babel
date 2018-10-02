@@ -5,7 +5,7 @@
 #include "User.h"
 
 User::User(Server &server, const BabelString &name)
-	: _server(server), _name(BabelString(name.getData())), _isAvailable(true), _id(1)
+	: _server(server), _name(BabelString(name.getData())), _status(Status::AVAILABLE), _id(1)
 {
 
 }
@@ -47,14 +47,14 @@ void User::transmit(const Message &message) {
 		session->deliver(message.getContent());
 }
 
-bool User::getStatus() const
+User::Status User::getStatus() const
 {
-	return _isAvailable;
+	return _status;
 }
 
-void User::setStatus(bool status)
+void User::setStatus(User::Status status)
 {
-	_isAvailable = status;
+	_status = status;
 }
 
 unsigned char User::getID() const

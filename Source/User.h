@@ -32,6 +32,12 @@ class User : public boost::enable_shared_from_this<User> {
 public:
 	typedef boost::shared_ptr<User> UserPointer;
 
+	typedef enum {
+		AVAILABLE,
+		BUSY,
+		HOSTING
+	} Status;
+
 	static UserPointer create(Server &_server, const BabelString &name);
 
 	void setName(const BabelString &name);
@@ -41,8 +47,8 @@ public:
 	const BabelString &getName() const;
 	const BabelString &getPassword() const;
 	void setPassword(const BabelString &password);
-	bool getStatus() const;
-	void setStatus(bool status);
+	Status getStatus() const;
+	void setStatus(User::Status status);
 	unsigned char getID() const;
 	void setID(unsigned char id);
 
@@ -58,7 +64,7 @@ private:
 	Server &_server;
 	BabelString _name;
 	BabelString _password;
-	bool _isAvailable;
+	Status _status;
 	unsigned char _id;
 };
 

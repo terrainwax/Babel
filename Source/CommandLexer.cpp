@@ -93,20 +93,42 @@ void CommandLexer::offline(BabelString &message, ServerSession *session)
 
 void CommandLexer::host(BabelString &message, ServerSession *session)
 {
+	if (session->getUser()->getStatus() != User::Status::BUSY)
+		ko();
+
 	sendAnswer("OK", session);
-	session->getUser()->setStatus(false);
+	session->getUser()->setStatus(User::Status::HOSTING);
 }
 
 void CommandLexer::call(BabelString &message, ServerSession *session)
 {
+	if (session->getUser()->getStatus() != User::Status::AVAILABLE)
+		ko();
+
+	// fuck my life
+	auto command = (Command *)message.getData();
+	std::string args(command->data.data + sizeof(CommandIdentifier));
+	auto tokens = tokenize(args);
+	auto usernamePtr = tokens.begin();
+	if (usernamePtr == tokens.end())
+		ko();
+	auto UIDToCall = BabelString(usernamePtr->c_str());
+	usernamePtr++;
+	if (usernamePtr == tokens.end())
+		ko();
+	auto portString = BabelString(usernamePtr->c_str());
+
 	sendAnswer("OK", session);
-	session->getUser()->setStatus(false);
+	session->getUser()->setStatus(User::Status::BUSY);
 }
 
 void CommandLexer::hang(BabelString &message, ServerSession *session)
 {
+	if (session->getUser()->getStatus() == User::Status::AVAILABLE)
+		ko();
+
 	sendAnswer("OK", session);
-	session->getUser()->setStatus(true);
+	session->getUser()->setStatus(User::Status::AVAILABLE);
 }
 
 void CommandLexer::alive(BabelString &message, ServerSession *session)

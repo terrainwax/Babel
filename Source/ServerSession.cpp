@@ -19,7 +19,7 @@ ServerSession::SessionPointer ServerSession::create(Server &server, boost::asio:
 }
 
 void ServerSession::open() {
-    Logger::get()->debug(BabelString("ServerSession Opened: ") + getAddress());
+	Logger::get()->debug(BabelString("ServerSession Opened: ") + getAddress());
 	sendRSAPublicKey();
 	startReadHeader();
 }
@@ -33,7 +33,7 @@ void ServerSession::sendRSAPublicKey()
 {
 	BabelString key = _crypto.getLocalPublicKey();
 
-    Logger::get()->debug(BabelString("Sending RSA Public Key:\n") + key);
+	Logger::get()->debug(BabelString("Sending RSA Public Key:\n") + key);
 
 	deliver(key);
 }
@@ -113,14 +113,14 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 
 				std::cout << std::endl;
 
-                Logger::get()->debug(BabelString("ServerSession Secured: ") + getAddress());
+				Logger::get()->debug(BabelString("ServerSession Secured: ") + getAddress());
 
 				_secured = true;
 			}
 		}
-        else
+		else
 		{
-        	BabelString decrypted = _crypto.decryptAES(_readMsg.str());
+			BabelString decrypted = _crypto.decryptAES(_readMsg.str());
 			_server.getLexer().parse(decrypted, this);
 		}
 		startReadHeader();

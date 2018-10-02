@@ -8,7 +8,7 @@
 #include "ServerCrypto.h"
 
 ServerCrypto::ServerCrypto()
-: CommonCrypto()
+	: CommonCrypto()
 {
 	_localKeyPairRSA = NULL;
 
@@ -48,16 +48,16 @@ BabelString ServerCrypto::decryptRSA(const BabelString &encryptedMessage)
 
 BabelString ServerCrypto::getLocalPublicKey()
 {
-    BIO *bio = BIO_new(BIO_s_mem());
+	BIO *bio = BIO_new(BIO_s_mem());
 
-    PEM_write_bio_RSAPublicKey(bio, _localKeyPairRSA);
-    int bioLength = BIO_pending(bio);
-    char keyBuffer[bioLength];
+	PEM_write_bio_RSAPublicKey(bio, _localKeyPairRSA);
+	int bioLength = BIO_pending(bio);
+	char keyBuffer[bioLength];
 
-    BIO_read(bio, keyBuffer, bioLength);
-    BIO_free_all(bio);
+	BIO_read(bio, keyBuffer, bioLength);
+	BIO_free_all(bio);
 
-    return BabelString(keyBuffer, bioLength - 1);
+	return BabelString(keyBuffer, bioLength - 1);
 }
 
 BabelString ServerCrypto::getLocalPrivateKey()
@@ -66,10 +66,10 @@ BabelString ServerCrypto::getLocalPrivateKey()
 
 	PEM_write_bio_RSAPrivateKey(bio, _localKeyPairRSA, NULL, NULL, 0, 0, NULL);
 	int bioLength = BIO_pending(bio);
-    char keyBuffer[bioLength];
+	char keyBuffer[bioLength];
 
-    BIO_read(bio, keyBuffer, bioLength);
-    BIO_free_all(bio);
+	BIO_read(bio, keyBuffer, bioLength);
+	BIO_free_all(bio);
 
-    return BabelString(keyBuffer, bioLength - 1);
+	return BabelString(keyBuffer, bioLength - 1);
 }
