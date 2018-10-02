@@ -32,12 +32,12 @@ void Server::stop() {
     Logger::get()->debug("Server Stopped");
 }
 
-void Server::broadcast(Message message)
+void Server::broadcast(const BabelString &message)
 {
-    std::cout << "Broadcasting message: " << message << std::endl;
+    Logger::get()->debug(BabelString("Broadcasting Message: '") + message + "'");
 
     for (auto session: _sessions)
-        session->deliver(message.getContent());
+        session->deliver(message);
 }
 
 User *Server::getUser(const BabelString &name) {

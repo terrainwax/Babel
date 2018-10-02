@@ -120,6 +120,9 @@ int main_server(int argc, char *argv[]) {
                 server.stop();
                 exit(0);
             }
+            else
+            	server.broadcast(line.c_str());
+
 
             //sleep(1);
             //std::cout << "$> ";

@@ -28,7 +28,7 @@ public:
 
     void start();
     void stop();
-    void broadcast(Message message);
+    void broadcast(const BabelString &message);
     User *getUser(const BabelString &name);
     User *newUser(const BabelString &name);
     CommandLexer &getLexer();
