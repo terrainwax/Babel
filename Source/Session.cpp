@@ -4,7 +4,7 @@
 
 #include "Session.h"
 
-Session::Session(boost::asio::io_context &io_context) : _socket(io_context), _active(true), _secured(false)
+Session::Session(boost::asio::io_context &io_context) : _socket(io_context), _active(false), _secured(false)
 {
 
 }

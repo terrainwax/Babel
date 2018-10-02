@@ -28,6 +28,7 @@ public:
 	static SessionPointer create(Client &_client, boost::asio::io_context& io_context);
 	void open() override;
 	void close() override;
+	void setupCrypto();
 	void deliver(const BabelString &message);
 
 private:

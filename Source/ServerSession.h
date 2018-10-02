@@ -33,6 +33,7 @@ public:
 	bool hasUser() const;
 	void setUser(User *user);
 	User *getUser() const;
+	void setupCrypto();
 
 private:
 

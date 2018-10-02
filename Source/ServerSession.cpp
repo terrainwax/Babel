@@ -19,6 +19,9 @@ ServerSession::SessionPointer ServerSession::create(Server &server, boost::asio:
 }
 
 void ServerSession::open() {
+	if (isActive())
+		throw ServerException("Cannot Open Active ServerSession");
+
 	Session::open();
 	Logger::get()->debug(BabelString("ServerSession Opened: ") + getAddress());
 	sendRSAPublicKey();
@@ -26,6 +29,9 @@ void ServerSession::open() {
 }
 
 void ServerSession::close() {
+	if (!isActive())
+		throw ServerException("Cannot Open Inactive ClientSession");
+
 	if (hasUser())
 		_user->removeSession(shared_from_this());
 	Logger::get()->debug(BabelString("ServerSession Closed: ") + getAddress());
@@ -75,6 +81,47 @@ void ServerSession::handleReadHeader(const boost::system::error_code &error, siz
 	}
 }
 
+void ServerSession::setupCrypto()
+{
+	if (_readMsg.str().substr(0, 18) == "ENCRYPTED AES KEY:") {
+		BabelString encryptedAESKey = _readMsg.str().substr(18, _readMsg.str().getSize() - 18);
+
+		_crypto.setAESKey(_crypto.decryptRSA(encryptedAESKey));
+
+		BabelString aesKey = _crypto.getAESKey();
+
+		std::cout << "Received Encrypted AES Key: ";
+
+		for (int i = 0; i < aesKey.getSize(); ++i)
+			std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesKey.getData()[i];
+
+		std::cout << std::endl;
+	}
+	else if (_readMsg.str().substr(0, 17) == "ENCRYPTED AES IV:") {
+		BabelString encryptedAESIv = _readMsg.str().substr(17, _readMsg.str().getSize() - 17);
+
+		_crypto.setAESIv(_crypto.decryptRSA(encryptedAESIv));
+
+		BabelString aesIv = _crypto.getAESIv();
+
+		std::cout << "Received Encrypted AES Iv: ";
+
+		for (int i = 0; i < aesIv.getSize(); ++i)
+			std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesIv.getData()[i];
+
+		std::cout << std::endl;
+
+		Logger::get()->debug(BabelString("ServerSession Secured: ") + getAddress());
+
+		_secured = true;
+	}
+	else
+	{
+		Logger::get()->error("ServerSession Could Not Be Secured");
+		close();
+	}
+}
+
 void ServerSession::startReadBody()
 {
 	boost::asio::async_read(_socket, boost::asio::buffer(_readMsg.body(), _readMsg.bodyLength()),
@@ -87,38 +134,7 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 {
 	if (!error) {
 		if (!_secured) {
-			if (_readMsg.str().substr(0, 18) == "ENCRYPTED AES KEY:") {
-				BabelString encryptedAESKey = _readMsg.str().substr(18, _readMsg.str().getSize() - 18);
-
-				_crypto.setAESKey(_crypto.decryptRSA(encryptedAESKey));
-
-				BabelString aesKey = _crypto.getAESKey();
-
-				std::cout << "Received Encrypted AES Key: ";
-
-				for (int i = 0; i < aesKey.getSize(); ++i)
-					std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesKey.getData()[i];
-
-				std::cout << std::endl;
-			}
-			if (_readMsg.str().substr(0, 17) == "ENCRYPTED AES IV:") {
-				BabelString encryptedAESIv = _readMsg.str().substr(17, _readMsg.str().getSize() - 17);
-
-				_crypto.setAESIv(_crypto.decryptRSA(encryptedAESIv));
-
-				BabelString aesIv = _crypto.getAESIv();
-
-				std::cout << "Received Encrypted AES Iv: ";
-
-				for (int i = 0; i < aesIv.getSize(); ++i)
-					std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesIv.getData()[i];
-
-				std::cout << std::endl;
-
-				Logger::get()->debug(BabelString("ServerSession Secured: ") + getAddress());
-
-				_secured = true;
-			}
+			setupCrypto();
 		}
 		else
 		{

@@ -19,12 +19,18 @@ ClientSession::SessionPointer ClientSession::create(Client &client, boost::asio:
 }
 
 void ClientSession::open() {
+    if (isActive())
+        throw ClientException("Cannot Open Active ClientSession");
+
     Session::open();
     Logger::get()->debug(BabelString("ClientSession Opened: ") + getAddress());
     startReadHeader();
 }
 
 void ClientSession::close() {
+    if (!isActive())
+        throw ClientException("Cannot Close Inactive ClientSession");
+
     Logger::get()->debug(BabelString("ClientSession Closed: ") + getAddress());
     Session::close();
 }
@@ -54,46 +60,55 @@ void ClientSession::startReadBody()
                                         boost::asio::placeholders::bytes_transferred));
 }
 
+void ClientSession::setupCrypto()
+{
+    if (_readMsg.str().substr(0, 30) == "-----BEGIN RSA PUBLIC KEY-----") {
+        const BabelString RSAPublicKey = _readMsg.str();
+        _crypto.setRemotePublicKey(RSAPublicKey);
+
+        Logger::get()->debug(BabelString("Received RSA Public Key:\n") + _crypto.getRemotePublicKey());
+
+        BabelString aesKey = _crypto.getAESKey();
+
+        std::cout << "Sending Encrypted AES Key: ";
+
+        for (int i = 0; i < aesKey.getSize(); ++i)
+            std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesKey.getData()[i];
+
+        std::cout << std::endl;
+
+        BabelString encryptedAESKey = _crypto.encryptRSA(aesKey);
+
+        deliver(BabelString("ENCRYPTED AES KEY:") + encryptedAESKey);
+
+        BabelString aesIv = _crypto.getAESIv();
+
+        std::cout << "Sending Encrypted AES Iv: ";
+
+        for (int i = 0; i < aesIv.getSize(); ++i)
+            std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesIv.getData()[i];
+
+        std::cout << std::endl;
+
+        BabelString encryptedAESIv = _crypto.encryptRSA(aesIv);
+
+        deliver(BabelString("ENCRYPTED AES IV:") + encryptedAESIv);
+
+        Logger::get()->debug(BabelString("ClientSession Secured: ") + getAddress());
+
+        _secured = true;
+    }
+    else {
+        Logger::get()->error("ClientSession Could Not Be Secured");
+        close();
+    }
+}
+
 void ClientSession::handleReadBody(const boost::system::error_code &error, size_t bytes)
 {
     if (!error) {
         if (!_secured) {
-            if (_readMsg.str().substr(0, 30) == "-----BEGIN RSA PUBLIC KEY-----") {
-                const BabelString RSAPublicKey = _readMsg.str();
-                _crypto.setRemotePublicKey(RSAPublicKey);
-
-                Logger::get()->debug(BabelString("Received RSA Public Key:\n") + _crypto.getRemotePublicKey());
-
-                BabelString aesKey = _crypto.getAESKey();
-
-                std::cout << "Sending Encrypted AES Key: ";
-
-                for (int i = 0; i < aesKey.getSize(); ++i)
-                    std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesKey.getData()[i];
-
-                std::cout << std::endl;
-
-                BabelString encryptedAESKey = _crypto.encryptRSA(aesKey);
-
-                deliver(BabelString("ENCRYPTED AES KEY:") + encryptedAESKey);
-
-                BabelString aesIv = _crypto.getAESIv();
-
-                std::cout << "Sending Encrypted AES Iv: ";
-
-                for (int i = 0; i < aesIv.getSize(); ++i)
-                    std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesIv.getData()[i];
-
-                std::cout << std::endl;
-
-                BabelString encryptedAESIv = _crypto.encryptRSA(aesIv);
-
-                deliver(BabelString("ENCRYPTED AES IV:") + encryptedAESIv);
-
-                Logger::get()->debug(BabelString("ClientSession Secured: ") + getAddress());
-
-                _secured = true;
-            }
+            setupCrypto();
         }
         else {
             BabelString decrypted = _crypto.decryptAES(_readMsg.str());

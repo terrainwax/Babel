@@ -38,8 +38,10 @@ void Server::broadcast(const BabelString &message)
 {
     Logger::get()->debug(BabelString("Broadcasting Message: '") + message + "'");
 
-    for (auto session: _sessions)
-        session->deliver(message);
+    for (auto session: _sessions) {
+        if (session->isActive())
+            session->deliver(message);
+    }
 }
 
 User *Server::getUser(const BabelString &name) {
