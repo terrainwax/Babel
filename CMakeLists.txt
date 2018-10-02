@@ -21,5 +21,5 @@ add_executable(CPP_babel_2018 Source/Main.cpp Source/Packet.cpp
         Source/ServerCrypto.cpp Source/ClientCrypto.cpp Source/ClientCrypto.h
         Source/CommonCrypto.cpp Source/CommonCrypto.h Source/CryptoException.cpp
         Source/CryptoException.h Source/BabelException.cpp
-        Source/BabelException.h Source/BabelString.cpp Source/BabelString.h Source/Logger.cpp Source/Logger.h Source/Session.cpp Source/Session.h)
+        Source/BabelException.h Source/BabelString.cpp Source/BabelString.h Source/Logger.cpp Source/Logger.h Source/Session.cpp Source/Session.h Source/ClientException.cpp Source/ClientException.h Source/ServerException.cpp Source/ServerException.h)
 target_link_libraries(CPP_babel_2018 ${CONAN_LIBS})

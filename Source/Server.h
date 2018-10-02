@@ -11,6 +11,7 @@
 
 #include "Logger.h"
 #include "CommandLexer.h"
+#include "ServerException.h"
 
 using boost::asio::ip::tcp;
 

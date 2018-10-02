@@ -9,7 +9,6 @@ Client::Client(const BabelString &address,
 	: _io_context(),
 	_endpoint(boost::asio::ip::address::from_string(address.getData()), port)
 {
-
 	startConnect();
 }
 
@@ -20,19 +19,20 @@ void Client::start()
 		try {
 			_io_context.run();
 		} catch (std::exception &e) {
-            Logger::get()->error("Client Crashed. An Error Occured.");
-			exit(1);
+			throw ClientException("IOContext Error In Client");
 		}
 	});
 }
 
 void Client::startConnect() {
 
-	ClientSession::SessionPointer session = ClientSession::create(*this, _io_context);
+	if (!_io_context.stopped()) {
+		ClientSession::SessionPointer session = ClientSession::create(*this, _io_context);
 
-	boost::asio::async_connect(session->getSocket(), &_endpoint,
-		boost::bind(&Client::handleConnect, this, session,
-			boost::asio::placeholders::error));
+		boost::asio::async_connect(session->getSocket(), &_endpoint,
+								   boost::bind(&Client::handleConnect, this, session,
+											   boost::asio::placeholders::error));
+	}
 }
 
 void Client::handleConnect(ClientSession::SessionPointer session,
@@ -58,6 +58,7 @@ void Client::stop() {
 	for (auto session: _sessions)
 		session->close();
 
+	_io_context.stop();
 	_mainThread.join();
 
 	Logger::get()->debug("Client Stopped");

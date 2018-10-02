@@ -13,6 +13,7 @@
 
 #include "Logger.h"
 #include "Packet.h"
+#include "ClientException.h"
 
 using boost::asio::ip::tcp;
 

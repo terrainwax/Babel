@@ -17,8 +17,7 @@ void Server::start()
         try {
             _io_context.run();
         } catch (std::exception &e) {
-            Logger::get()->error("Server Crashed. An Error Occured.");
-            exit(1);
+            throw ServerException("IOContext Error In Server");
         }
     });
 }
@@ -27,6 +26,7 @@ void Server::stop() {
     for (auto session: _sessions)
         session->close();
 
+    _io_context.stop();
     _mainThread.join();
 
     Logger::get()->debug("Server Stopped");
@@ -61,12 +61,14 @@ User *Server::newUser(const BabelString &name) {
 
 void Server::startAccept()
 {
-    ServerSession::SessionPointer session =
-            ServerSession::create(*this, _acceptor.get_executor().context());
+    if (!_io_context.stopped()) {
+        ServerSession::SessionPointer session =
+                ServerSession::create(*this, _acceptor.get_executor().context());
 
-    _acceptor.async_accept(session->getSocket(),
-                           boost::bind(&Server::handleAccept, this, session,
-                                       boost::asio::placeholders::error));
+        _acceptor.async_accept(session->getSocket(),
+                               boost::bind(&Server::handleAccept, this, session,
+                                           boost::asio::placeholders::error));
+    }
 }
 
 void Server::handleAccept(ServerSession::SessionPointer session,
