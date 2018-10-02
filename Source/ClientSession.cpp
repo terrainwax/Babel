@@ -19,13 +19,14 @@ ClientSession::SessionPointer ClientSession::create(Client &client, boost::asio:
 }
 
 void ClientSession::open() {
+    Session::open();
     Logger::get()->debug(BabelString("ClientSession Opened: ") + getAddress());
     startReadHeader();
 }
 
 void ClientSession::close() {
     Logger::get()->debug(BabelString("ClientSession Closed: ") + getAddress());
-    _socket.close();
+    Session::close();
 }
 
 void ClientSession::startReadHeader()
@@ -41,9 +42,7 @@ void ClientSession::handleReadHeader(const boost::system::error_code &error, siz
     if (!error && _readMsg.decodeHeader()) {
         startReadBody();
     } else {
-        //if (hasUser())
-            //_user->removeSession(shared_from_this());
-        //_socket.stop();
+       close();
     }
 }
 
@@ -102,8 +101,7 @@ void ClientSession::handleReadBody(const boost::system::error_code &error, size_
         }
         startReadHeader();
     } else {
-        //if (hasUser())
-            //_user->removeSession(shared_from_this());
+        close();
     }
 }
 
@@ -126,8 +124,7 @@ void ClientSession::handleWrite(const boost::system::error_code &error, size_t b
             startWrite();
         }
     } else {
-        //if (hasUser())
-            //_user->removeSession(shared_from_this());
+        close();
     }
 }
 
@@ -135,7 +132,7 @@ void ClientSession::deliver(const BabelString &message)
 {
     BabelString data = message;
 
-    if (_secured)
+    if (isSecured())
         data = _crypto.encryptAES(message);
 
     Packet packet;

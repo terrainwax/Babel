@@ -26,8 +26,8 @@ public:
 	typedef boost::shared_ptr<ClientSession> SessionPointer;
 
 	static SessionPointer create(Client &_client, boost::asio::io_context& io_context);
-	void open();
-	void close();
+	void open() override;
+	void close() override;
 	void deliver(const BabelString &message);
 
 private:

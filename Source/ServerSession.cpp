@@ -19,6 +19,7 @@ ServerSession::SessionPointer ServerSession::create(Server &server, boost::asio:
 }
 
 void ServerSession::open() {
+	Session::open();
 	Logger::get()->debug(BabelString("ServerSession Opened: ") + getAddress());
 	sendRSAPublicKey();
 	startReadHeader();
@@ -26,7 +27,7 @@ void ServerSession::open() {
 
 void ServerSession::close() {
 	Logger::get()->debug(BabelString("ServerSession Closed: ") + getAddress());
-	_socket.close();
+	Session::close();
 }
 
 void ServerSession::sendRSAPublicKey()
@@ -70,6 +71,7 @@ void ServerSession::handleReadHeader(const boost::system::error_code &error, siz
 	} else {
 		if (hasUser())
 			_user->removeSession(shared_from_this());
+		close();
 	}
 }
 
@@ -127,6 +129,7 @@ void ServerSession::handleReadBody(const boost::system::error_code &error, size_
 	} else {
 		if (hasUser())
 			_user->removeSession(shared_from_this());
+		close();
 	}
 }
 
@@ -151,6 +154,7 @@ void ServerSession::handleWrite(const boost::system::error_code &error, size_t b
 	} else {
 		if (hasUser())
 			_user->removeSession(shared_from_this());
+		close();
 	}
 }
 
@@ -158,7 +162,7 @@ void ServerSession::deliver(const BabelString &message)
 {
 	BabelString data = message;
 
-	if (_secured)
+	if (isSecured())
 		data = _crypto.encryptAES(message);
 
 	Packet packet;

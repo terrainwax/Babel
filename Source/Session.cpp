@@ -4,9 +4,30 @@
 
 #include "Session.h"
 
-Session::Session(boost::asio::io_context &io_context) : _socket(io_context), _secured(false)
+Session::Session(boost::asio::io_context &io_context) : _socket(io_context), _active(true), _secured(false)
 {
 
+}
+
+void Session::open()
+{
+    _active = true;
+}
+
+void Session::close()
+{
+    _active = false;
+    _socket.close();
+}
+
+bool Session::isActive() const
+{
+    return _active;
+}
+
+bool Session::isSecured() const
+{
+    return _secured;
 }
 
 tcp::socket &Session::getSocket()

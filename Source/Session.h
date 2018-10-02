@@ -20,8 +20,13 @@ public:
     Session(boost::asio::io_context &io_context);
     tcp::socket &getSocket();
     BabelString getAddress() const;
+    bool isActive() const;
+    bool isSecured() const;
+    virtual void open();
+    virtual void close();
 protected:
     tcp::socket _socket;
+    bool _active;
     bool _secured;
 };
 
