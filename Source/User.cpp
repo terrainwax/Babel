@@ -5,7 +5,7 @@
 #include "User.h"
 
 User::User(Server &server, const BabelString &name)
-	: _server(server), _name(BabelString(name.getData())), _status(Status::AVAILABLE), _id(1)
+	: _server(server), _name(BabelString(name.getData())), _status(Status::AVAILABLE)
 {
 
 }
@@ -55,16 +55,6 @@ User::Status User::getStatus() const
 void User::setStatus(User::Status status)
 {
 	_status = status;
-}
-
-unsigned char User::getID() const
-{
-	return _id;
-}
-
-void User::setID(unsigned char id)
-{
-	_id = id;
 }
 
 void User::setPassword(const BabelString &password)
