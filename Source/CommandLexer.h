@@ -39,6 +39,7 @@ private:
 	void hang(BabelString &message, ServerSession *session);
 	void alive(BabelString &message, ServerSession *session);
 	void list(BabelString &message, ServerSession *session);
+	void join(BabelString &message, ServerSession *session);
 
 	Server &_server;
 	std::map<CommandIdentifier, std::function<void(BabelString &, ServerSession *)>> _functionMap;

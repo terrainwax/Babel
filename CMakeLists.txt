@@ -27,7 +27,7 @@ if (NOT QTCREATOR)
         Source/BabelException.h Source/BabelString.cpp Source/BabelString.h
 		Source/Logger.cpp Source/Logger.h Source/Session.cpp Source/Session.h
 		Source/ClientException.cpp Source/ClientException.h
-		Source/ServerException.cpp Source/ServerException.h Source/NetworkException.cpp Source/NetworkException.h)
+		Source/ServerException.cpp Source/ServerException.h Source/NetworkException.cpp Source/NetworkException.h Source/Call.cpp Source/Call.h Source/Call.cpp Source/Call.h)
 target_link_libraries(CPP_babel_2018 ${CONAN_LIBS})
 endif()
 

@@ -25,6 +25,7 @@ class CommandLexer;
 class Server {
 public:
     Server(unsigned short port);
+    ~Server();
 
     void start();
     void stop();
@@ -46,6 +47,7 @@ private:
     std::thread _mainThread;
     CommandLexer _lexer;
     std::vector<User *> _onlineUsers;
+    bool _active;
 };
 
 #include "ServerSession.h"

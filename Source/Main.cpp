@@ -27,53 +27,14 @@ int main_client(int argc, char *argv[]) {
 
 		client.start();
 
-		/*
-		sleep(1);
-
-		std::cout << "Username: ";
-		BabelString username;
-		getline(std::cin, username);
-
-		std::cout << "Password: ";
-
-		termios oldt;
-		tcgetattr(STDIN_FILENO, &oldt);
-		termios newt = oldt;
-		newt.c_lflag &= ~ECHO;
-		tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-		BabelString password;
-		getline(std::cin, password);
-
-		tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-
-		std::cout << std::endl;
-
-		if (username.size() >= 16){
-		    std::cerr << "Username is too long\n";
-		    return 1;
-		}
-
-		Packet nameMsg;
-		nameMsg.bodyLength(username.size() + password.size() + 7);
-		std::memcpy(nameMsg.body(), "LOGIN:", 6);
-		std::memcpy(nameMsg.body() + 6, username.data(), username.size());
-		std::memcpy(nameMsg.body() + username.size() + 6, "/", 1);
-		std::memcpy(nameMsg.body() + username.size() + 7, password.data(), password.size());
-		nameMsg.encodeHeader();
-		client.write(nameMsg);*/
-
-		//sleep(1);
-        //std::cout << "$> ";
-
 		std::string line;
 		while (std::getline(std::cin, line)) {
 
-		    if (line == "exit")
-            {
-		        client.stop();
-		        exit(0);
-            }
+			if (line == "exit")
+			{
+				client.stop();
+				exit(0);
+			}
 
 			Command command = {0};
 			command.magic = COMMAND_MAGIC;
@@ -84,9 +45,6 @@ int main_client(int argc, char *argv[]) {
 			std::memcpy((char *)command.data.data + sizeof(CommandIdentifier), line.c_str(), line.size());
 
 			client.write(BabelString((char *)&command, sizeof(Command)));
-
-            //sleep(1);
-			//std::cout << "$> ";
 		}
 
 		client.stop();
@@ -109,29 +67,22 @@ int main_server(int argc, char *argv[]) {
 
 		server.start();
 
-        //sleep(1);
-        //std::cout << "$> ";
-
-        std::string line;
+		std::string line;
 		while (std::getline(std::cin, line)) {
 
-            if (line == "exit")
-            {
-                server.stop();
-                exit(0);
-            }
-            else
-            	server.broadcast(line.c_str());
-
-
-            //sleep(1);
-            //std::cout << "$> ";
+			if (line == "exit")
+			{
+				server.stop();
+				exit(0);
+			}
+			else
+				server.broadcast(line.c_str());
 		}
 
 		server.stop();
 	}
 	catch (std::exception &e) {
-		std::cerr << "Exception: " << e.what() << "\n";
+		std::cerr << "An error occured. Exiting." << std::endl;
 	}
 
 	return 0;

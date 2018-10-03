@@ -17,8 +17,8 @@
 	#include "Message.h"
 #endif
 
+class Call;
 class Server;
-
 class ServerSession;
 typedef boost::shared_ptr<ServerSession> ServerSessionPointer;
 
@@ -35,6 +35,7 @@ public:
 	typedef enum {
 		AVAILABLE,
 		BUSY,
+		CALLING,
 		HOSTING
 	} Status;
 
@@ -49,6 +50,9 @@ public:
 	void setPassword(const BabelString &password);
 	Status getStatus() const;
 	void setStatus(User::Status status);
+	Call *getCall();
+	void hostCall(BabelString ip, BabelString port);
+	void stopCall();
 
 private:
 	explicit User(Server &_server, const BabelString &name);
@@ -63,10 +67,12 @@ private:
 	BabelString _name;
 	BabelString _password;
 	Status _status;
+	Call *_call;
 };
 
 #include "Server.h"
 #include "ServerSession.h"
 #include "Message.h"
+#include "Call.h"
 
 #endif //CPP_BABEL_2018_USER_H

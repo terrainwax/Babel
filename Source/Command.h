@@ -18,7 +18,8 @@ typedef enum {
 	CALL = 4,
 	HANG = 5,
 	ALIVE = 6,
-	LIST = 7
+	LIST = 7,
+	JOIN = 8
 } CommandIdentifier;
 
 typedef union {

@@ -11,38 +11,38 @@ Session::Session(boost::asio::io_context &io_context) : _socket(io_context), _ac
 
 void Session::open()
 {
-    _active = true;
+	_active = true;
 }
 
 void Session::close()
 {
-    _active = false;
-    _socket.close();
+	_active = false;
+	_socket.close();
 }
 
 bool Session::isActive() const
 {
-    return _active;
+	return _active;
 }
 
 bool Session::isSecured() const
 {
-    return _secured;
+	return _secured;
 }
 
 tcp::socket &Session::getSocket()
 {
-    return _socket;
+	return _socket;
 }
 
 BabelString Session::getAddress() const
 {
-    return BabelString(_socket.remote_endpoint().address().to_string().c_str());
+	return BabelString(_socket.remote_endpoint().address().to_string().c_str());
 }
 
 std::ostream& operator<<(std::ostream& os, const Session& session)
 {
-    os << session.getAddress();
+	os << session.getAddress();
 
-    return os;
+	return os;
 }

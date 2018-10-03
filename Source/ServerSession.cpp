@@ -32,9 +32,16 @@ void ServerSession::close() {
 	if (!isActive())
 		throw ServerException("Cannot Open Inactive ClientSession");
 
-	if (hasUser())
+	if (hasUser()) {
+		for (auto it = _server.getOnlineUsers().begin(); it != _server.getOnlineUsers().end(); it++) {
+			if (*it == _user) {
+				_server.getOnlineUsers().erase(it);
+				break;
+			}
+		}
 		_user->removeSession(shared_from_this());
-	Logger::get()->debug(BabelString("ServerSession Closed: ") + getAddress());
+	}
+	Logger::get()->debug(BabelString("ServerSession Closed From Someone. We Don't Know. We Don't Care."));
 	Session::close();
 }
 

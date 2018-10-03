@@ -5,7 +5,7 @@
 #include "User.h"
 
 User::User(Server &server, const BabelString &name)
-	: _server(server), _name(BabelString(name.getData())), _status(Status::AVAILABLE)
+	: _server(server), _name(BabelString(name.getData())), _status(Status::AVAILABLE), _call(nullptr)
 {
 
 }
@@ -29,7 +29,7 @@ const BabelString &User::getPassword() const
 
 void User::addSession(ServerSessionPointer session) {
 	_sessions.insert(session);
-	for (auto message: _recentMessageQueue)
+	for (const auto &message: _recentMessageQueue)
 		session->deliver(message.getContent());
 }
 
@@ -43,7 +43,7 @@ void User::transmit(const Message &message) {
 	while (_recentMessageQueue.size() > max_recent_messages)
 		_recentMessageQueue.pop_front();
 
-	for (auto session: _sessions)
+	for (const auto &session: _sessions)
 		session->deliver(message.getContent());
 }
 
@@ -66,3 +66,21 @@ const BabelString &User::getName() const
 {
 	return _name;
 }
+
+void User::hostCall(BabelString ip, BabelString port)
+{
+	_call = new Call(this, ip, port);
+}
+
+Call *User::getCall()
+{
+	return _call;
+}
+
+void User::stopCall()
+{
+	_status = Status::AVAILABLE;
+	delete _call;
+	_call = nullptr;
+}
+
