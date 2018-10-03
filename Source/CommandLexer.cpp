@@ -26,13 +26,13 @@ void CommandLexer::parse(BabelString &message, ServerSession *session)
 	auto command = (Command *) message.getData();
 
 	if (command->magic != COMMAND_MAGIC)
-		ko();
+	ko();
 
 	auto function = _functionMap[command->data.id];
 	if (function)
 		function(message, session);
 	else
-		ko();
+	ko();
 }
 
 void CommandLexer::sendAnswer(BabelString answer, ServerSession *session)
@@ -79,7 +79,7 @@ void CommandLexer::host(BabelString &message, ServerSession *session)
 	ko();
 
 	if (session->getUser()->getStatus() != User::Status::BUSY)
-		ko();
+	ko();
 
 	sendAnswer("OK", session);
 	session->getUser()->setStatus(User::Status::HOSTING);
@@ -91,7 +91,7 @@ void CommandLexer::call(BabelString &message, ServerSession *session)
 	ko();
 
 	if (session->getUser()->getStatus() != User::Status::AVAILABLE)
-		ko();
+	ko();
 
 	// fuck my life
 	auto command = (Command *)message.getData();
@@ -99,19 +99,15 @@ void CommandLexer::call(BabelString &message, ServerSession *session)
 	auto tokens = tokenize(args);
 	auto usernamePtr = tokens.begin();
 	if (usernamePtr == tokens.end())
-		ko();
+	ko();
 	auto username = BabelString(usernamePtr->c_str());
 	usernamePtr++;
 	if (usernamePtr == tokens.end())
-		ko();
+	ko();
 	auto portString = BabelString(usernamePtr->c_str());
-	try {
-		auto port = boost::lexical_cast<unsigned short>(portString.getData());
-	} catch (const boost::bad_lexical_cast &e)
-		ko();
 	auto user = _server.getUser(username);
 	if (user->getStatus() != User::Status::AVAILABLE)
-		ko();
+	ko();
 
 	auto answerMessage = Message(BabelString("CALL ")
 		+ session->getUser()->getName() + " " +
@@ -128,7 +124,7 @@ void CommandLexer::hang(BabelString &message, ServerSession *session)
 	ko();
 
 	if (session->getUser()->getStatus() == User::Status::AVAILABLE)
-		ko();
+	ko();
 
 	sendAnswer("OK", session);
 	session->getUser()->setStatus(User::Status::AVAILABLE);
@@ -153,8 +149,8 @@ void CommandLexer::list(BabelString &message, ServerSession *session)
 		char line[1024];
 		std::snprintf(line, 1024, "\n%s %s", user->getName().getData(),
 			user->getStatus() == User::Status::AVAILABLE ? "Available"
-			: user->getStatus() == User::Status::BUSY ? "Busy"
-			: "Hosting");
+				: user->getStatus() == User::Status::BUSY ? "Busy"
+				: "Hosting");
 		answer.append(line);
 	}
 
