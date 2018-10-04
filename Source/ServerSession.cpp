@@ -35,6 +35,7 @@ void ServerSession::close() {
 	if (hasUser()) {
 		for (auto it = _server.getOnlineUsers().begin(); it != _server.getOnlineUsers().end(); it++) {
 			if (*it == _user) {
+				_server.broadcast()
 				_server.getOnlineUsers().erase(it);
 				break;
 			}

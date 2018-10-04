@@ -45,7 +45,7 @@ void Server::broadcast(const BabelString &message)
 	Logger::get()->debug(
 		BabelString("Broadcasting Message: '") + message + "'");
 
-	for (auto session: _sessions) {
+	for (const auto &session: _sessions) {
 		if (session->isActive())
 			session->deliver(message);
 	}
@@ -108,4 +108,15 @@ std::vector<User *> &Server::getOnlineUsers()
 Server::~Server()
 {
 	stop();
+}
+
+void Server::broadcast(const BabelString &message, ServerSession *sessionBroadcaster)
+{
+	Logger::get()->debug(
+		BabelString("Broadcasting Message: '") + message + "'");
+
+	for (const auto &session : _sessions) {
+		if (session->hasUser() && session->getUser() != sessionBroadcaster->getUser() && session->isActive())
+			session->deliver(message);
+	}
 }

@@ -54,6 +54,7 @@ void CommandLexer::online(BabelString &message, ServerSession *session)
 	_server.getOnlineUsers().emplace_back(session->getUser());
 	sendAnswer("OK", session);
 	Logger::get()->debug(BabelString("User ") + session->getUser()->getName() + " now online");
+	broadcast(BabelString("LIST ") + session->getUser()->getName() + " Available", session);
 }
 
 void CommandLexer::offline(BabelString &message, ServerSession *session)
@@ -68,6 +69,7 @@ void CommandLexer::offline(BabelString &message, ServerSession *session)
 			user = _server.getOnlineUsers().erase(user);
 			sendAnswer("OK", session);
 			Logger::get()->debug(BabelString("User ") + session->getUser()->getName() + " now offline");
+			broadcast(BabelString("LIST ") + session->getUser()->getName() + " Offline", session);
 			return;
 		}
 	}
@@ -86,6 +88,7 @@ void CommandLexer::host(BabelString &message, ServerSession *session)
 	sendAnswer("OK", session);
 	session->getUser()->setStatus(User::Status::HOSTING);
 	Logger::get()->debug(session->getUser()->getName() + " now hosting a call");
+	broadcast(BabelString("LIST ") + session->getUser()->getName() + " Hosting", session);
 }
 
 void CommandLexer::call(BabelString &message, ServerSession *session)
@@ -138,6 +141,7 @@ void CommandLexer::hang(BabelString &message, ServerSession *session)
 	sendAnswer("OK", session);
 	session->getUser()->setStatus(User::Status::AVAILABLE);
 	Logger::get()->debug(session->getUser()->getName() + "hung up the call");
+	broadcast(BabelString("LIST ") + session->getUser()->getName() + " Available", session);
 }
 
 void CommandLexer::alive(BabelString &message, ServerSession *session)
@@ -150,22 +154,21 @@ void CommandLexer::list(BabelString &message, ServerSession *session)
 	if (!session->hasUser())
 	ko();
 
-	BabelString answer("OK");
+	sendAnswer("OK", session);
 
 	for (auto user : _server.getOnlineUsers())
 	{
 		if (user == session->getUser())
 			continue;
 		char line[1024];
-		std::snprintf(line, 1024, "\n%s %s", user->getName().getData(),
+		std::snprintf(line, 1024, "LIST %s %s", user->getName().getData(),
 			user->getStatus() == User::Status::AVAILABLE ? "Available"
 				: user->getStatus() == User::Status::BUSY
 				|| user->getStatus() == User::Status::CALLING ? "Busy"
 				: "Hosting");
-		answer.append(line);
+		sendAnswer(BabelString(line), session);
 	}
 
-	sendAnswer(answer, session);
 	Logger::get()->debug(session->getUser()->getName() + " listed online users.");
 }
 
@@ -221,21 +224,28 @@ void CommandLexer::join(BabelString &message, ServerSession *session)
 	auto username = BabelString(command->data.data + sizeof(CommandIdentifier));
 
 	if (username.empty())
-		ko();
+	ko();
 
 	auto userToJoin = _server.getUser(username);
 	if (userToJoin == nullptr || userToJoin->getStatus() != User::Status::CALLING)
-		ko();
+	ko();
 
 	auto answer = BabelString("OK ") + userToJoin->getCall()->getIP() +
 		BabelString(" ") + userToJoin->getCall()->getPort();
 	sendAnswer(answer, session);
 	userToJoin->setStatus(User::Status::BUSY);
 	session->getUser()->setStatus(User::Status::BUSY);
+	broadcast(BabelString("LIST ") + session->getUser()->getName() + " Busy", session);
+	broadcast(BabelString("LIST ") + userToJoin->getName() + " Busy", session);
 }
 
 CommandLexer::Tokens CommandLexer::tokenize(std::string &toTokenize)
 {
 	boost::char_separator<char> separator(" \t");
 	return Tokens(toTokenize, separator);
+}
+
+void CommandLexer::broadcast(BabelString answer, ServerSession *session)
+{
+	_server.broadcast(answer, session);
 }

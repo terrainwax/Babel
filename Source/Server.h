@@ -24,30 +24,31 @@ class CommandLexer;
 
 class Server {
 public:
-    Server(unsigned short port);
-    ~Server();
+	Server(unsigned short port);
+	~Server();
 
-    void start();
-    void stop();
-    void broadcast(const BabelString &message);
-    User *getUser(const BabelString &name);
-    User *newUser(const BabelString &name);
-    CommandLexer &getLexer();
-    std::vector<User *> &getOnlineUsers();
+	void start();
+	void stop();
+	void broadcast(const BabelString &message);
+	void broadcast(const BabelString &message, ServerSession *session);
+	User *getUser(const BabelString &name);
+	User *newUser(const BabelString &name);
+	CommandLexer &getLexer();
+	std::vector<User *> &getOnlineUsers();
 
 private:
-    void startAccept();
-    void handleAccept(ServerSessionPointer, const boost::system::error_code &error);
+	void startAccept();
+	void handleAccept(ServerSessionPointer, const boost::system::error_code &error);
 
-    std::set<ServerSessionPointer> _sessions;
-    std::set<UserPointer> _users;
-    boost::asio::io_context _io_context;
-    tcp::endpoint _endpoint;
-    tcp::acceptor _acceptor;
-    std::thread _mainThread;
-    CommandLexer _lexer;
-    std::vector<User *> _onlineUsers;
-    bool _active;
+	std::set<ServerSessionPointer> _sessions;
+	std::set<UserPointer> _users;
+	boost::asio::io_context _io_context;
+	tcp::endpoint _endpoint;
+	tcp::acceptor _acceptor;
+	std::thread _mainThread;
+	CommandLexer _lexer;
+	std::vector<User *> _onlineUsers;
+	bool _active;
 };
 
 #include "ServerSession.h"
