@@ -35,7 +35,7 @@ void ServerSession::close() {
 	if (hasUser()) {
 		for (auto it = _server.getOnlineUsers().begin(); it != _server.getOnlineUsers().end(); it++) {
 			if (*it == _user) {
-				_server.broadcast()
+				_server.broadcast(BabelString("LIST ") + _user->getName() + " Offline", this);
 				_server.getOnlineUsers().erase(it);
 				break;
 			}
