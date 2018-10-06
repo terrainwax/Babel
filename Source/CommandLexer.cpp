@@ -132,6 +132,19 @@ void CommandLexer::hang(BabelString &message, ServerSession *session)
 	if (!session->hasUser())
 	ko();
 
+	auto command = (Command *)message.getData();
+	auto username = BabelString(command->data.data + sizeof(CommandIdentifier));
+	if (!username.empty()) {
+		auto user = _server.getUser(username);
+		if (user == nullptr || user->getStatus() != User::Status::CALLING)
+			ko();
+		auto message = Message(BabelString("HANG"), session);
+		user->setStatus(User::Status::AVAILABLE);
+		user->transmit(message);
+		sendAnswer("OK", session);
+		return;
+	}
+
 	if (session->getUser()->getStatus() == User::Status::AVAILABLE)
 	ko();
 
