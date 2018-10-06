@@ -84,3 +84,14 @@ void User::stopCall()
 	_call = nullptr;
 }
 
+ServerSessionPointer User::getRecentSession()
+{
+	ServerSessionPointer ptr = *_sessions.begin();
+	for (const auto &pointer : _sessions) {
+		if (pointer->isActive())
+			ptr = pointer;
+	}
+
+	return (ptr);
+}
+

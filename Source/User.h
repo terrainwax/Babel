@@ -53,6 +53,7 @@ public:
 	Call *getCall();
 	void hostCall(BabelString ip, BabelString port);
 	void stopCall();
+	ServerSessionPointer getRecentSession();
 
 private:
 	explicit User(Server &_server, const BabelString &name);

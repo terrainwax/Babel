@@ -122,7 +122,7 @@ void CommandLexer::call(BabelString &message, ServerSession *session)
 	auto answerMessage = Message(BabelString("CALL ")
 		+ session->getUser()->getName(), session);
 	user->transmit(answerMessage);
-	sendAnswer("OK", session);
+	sendAnswer(BabelString("OK ") + user->getRecentSession()->getAddress(), session);
 	session->getUser()->setStatus(User::Status::CALLING);
 	Logger::get()->debug(session->getUser()->getName() + BabelString(" calling ") + user->getName());
 }
