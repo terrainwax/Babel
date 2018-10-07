@@ -257,7 +257,7 @@ void CommandLexer::join(BabelString &message, ServerSession *session)
 	userToJoin->setStatus(User::Status::BUSY);
 	session->getUser()->setStatus(User::Status::BUSY);
 
-	auto answerUserToJoin = BabelString("JOIN ") + session->getUser()->getName() + port;
+	auto answerUserToJoin = BabelString("JOIN ") + session->getUser()->getName() + BabelString(" ") + port;
 	userToJoin->transmit(Message(answerUserToJoin, session));
 
 	broadcast(BabelString("LIST ") + session->getUser()->getName() + " Busy", session);
