@@ -7,7 +7,6 @@
 #include "Voice.h"
 
 void AudioThread::run() {
-    std::cout << client->incall << " Amanager:" <<  client->Amanager->readFromStream() << std::endl;
     while(client->incall && client->Amanager->readFromStream()) {
         if (client->isCo) {
             unsigned char *data = client->Amanager->getReadBuffer();
