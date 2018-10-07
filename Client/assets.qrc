@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>Ressources/Images/20860.jpg</file>
         <file>Ressources/Images/babel.png</file>
+        <file>Ressources/Images/if_Phone_2744956.png</file>
+        <file>Ressources/Images/if_036_phone_call_hang_1472932.png</file>
     </qresource>
 </RCC>

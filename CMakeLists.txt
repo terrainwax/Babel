@@ -8,9 +8,6 @@ if (WIN32)
     set(CMAKE_CXX_FLAGS "/MD -GX")
 	set(CMAKE_BUILD_TYPE Release)
 endif()
-if (QTCREATOR)
-    set(CMAKEDIR ${CMAKE_BINARY_DIR}/cmake-build-release)
-endif()
 
 include(${CMAKEDIR}/conanbuildinfo.cmake)
 conan_basic_setup()
@@ -43,10 +40,37 @@ find_package(Qt5 COMPONENTS REQUIRED Core Gui Widgets Multimedia)
 
 set(project_sources
     Client/main.cpp
-	Client/login.cpp
-)
-set(project_headers Client/login.h)
-set(project_ui 	Client/login.ui)
+    Client/login.cpp
+    Client/ClientCrypto.cpp
+    Client/CommonCrypto.cpp
+    Client/CryptoException.cpp
+    Client/BabelException.cpp
+    Client/BabelString.cpp
+    Client/client.cpp
+    Client/Packet.cpp
+    Client/AudioManager.cpp
+    Client/EncodeManager.cpp
+    Client/user.cpp
+    Client/call.cpp
+    Client/AudioThread.cpp
+    Client/receive.cpp Client/VoiceThread.cpp Client/VoiceThread.h)
+set(project_headers
+    Client/login.h
+    Client/ClientCrypto.h
+    Client/CommonCrypto.h
+    Client/CryptoException.h
+    Client/BabelException.h
+    Client/BabelString.h
+    Client/client.h
+    Client/Packet.h
+    Client/AudioManager.h
+    Client/EncodeManager.h
+    Client/GlobalSession.h
+    Client/Command.h
+    Client/user.h
+    Client/call.h Client/AudioThread.cpp Client/AudioThread.h
+    Client/receive.h Client/VoiceThread.cpp Client/VoiceThread.h)
+set(project_ui 	Client/login.ui Client/user.ui Client/call.ui Client/receive.ui)
 
 qt5_wrap_ui(ui_wrap ${project_ui})
 qt5_wrap_cpp(moc_sources ${project_headers})

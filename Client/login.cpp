@@ -3,13 +3,20 @@
 #include "ui_login.h"
 #include "QGraphicsOpacityEffect"
 #include "QPropertyAnimation"
-
+#include "GlobalSession.h"
+#include "Command.h"
+#include "user.h"
 
 Login::Login(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Login)
 {
+
     ui->setupUi(this);
+    client->ui = this->ui;
+    client->w = this;
+    ui->widget_2->setHidden(true);
+
 
 }
 
@@ -20,19 +27,17 @@ Login::~Login()
 
 void Login::on_pushButton_clicked()
 {
-    if (ui->stackedWidget->currentIndex() == 0)
-    {
-    QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(this);
-    ui->label_5->setGraphicsEffect(eff);
-    ui->frame_3->setGraphicsEffect(eff);
-    QPropertyAnimation *a = new QPropertyAnimation(eff,"opacity");
-    a->setDuration(500);
-    a->setStartValue(1);
-    a->setEndValue(0);
-    a->setEasingCurve(QEasingCurve::OutBack);
-    a->start(QPropertyAnimation::DeleteWhenStopped);
-    connect(a,SIGNAL(finished()),this,SLOT(hideThisWidget()));
-    }
+    std::cout << "clicked " << std::endl;
+    ui->lineEdit->setDisabled(1);
+    ui->lineEdit_2->setDisabled(1);
+    std::string login;
+    login = std::string(" ") + ui->lineEdit->text().toStdString() + std::string(" ") + ui->lineEdit_2->text().toStdString();
+    Command command = {0};
+    command.magic = COMMAND_MAGIC;
+    command.data.id = CommandIdentifier::LOGIN;
+    std::memcpy((char *)command.data.data + sizeof(CommandIdentifier), login.c_str(), login.size());
+    client->deliver(BabelString((char *)&command, sizeof(Command)), true);
+
 
 }
 
@@ -50,15 +55,40 @@ void Login::on_caltest_clicked()
     a->setStartValue(ui->label_8->geometry());
     a->setEndValue(QRect(910, 0 , 371 , 131));
     a->start();
-    std::cout << "dqsdqsd" << std::endl;
     }
     else
     {
-        std::cout << "qqsdqsd" << std::endl;
         QPropertyAnimation *a = new QPropertyAnimation(ui->label_8,"geometry");
         a->setDuration(200);
         a->setStartValue(ui->label_8->geometry());
         a->setEndValue(QRect(910, -131 , 371 , 131));
         a->start();
     }
+}
+
+void Login::on_listWidget_itemClicked(QListWidgetItem *item)
+{
+    User *user = static_cast<User *>(ui->listWidget->itemWidget(item));
+    ui->widget->setName(user->getName());
+    if(ui->widget->geometry().x() == 1280)
+    {
+    QPropertyAnimation *a = new QPropertyAnimation(ui->widget,"geometry");
+    a->setDuration(200);
+    a->setStartValue(ui->widget->geometry());
+    a->setEndValue(QRect(1039, 0 , 241 , 300));
+    a->start();
+    }
+
+}
+
+void Login::on_calltest_clicked()
+{
+
+    client->Call("82.255.137.138", 4242);
+
+}
+
+void Login::on_mute_clicked()
+{
+    client->muted = !client->muted;
 }
