@@ -234,7 +234,15 @@ void CommandLexer::login(BabelString &message, ServerSession *session)
 void CommandLexer::join(BabelString &message, ServerSession *session)
 {
 	auto command = (Command *)message.getData();
-	auto username = BabelString(command->data.data + sizeof(CommandIdentifier));
+	auto args = std::string(command->data.data + sizeof(CommandIdentifier));
+	auto tokens = tokenize(args);
+	auto username = BabelString(tokens.begin()->c_str());
+
+	auto portPtr = tokens.begin();
+	BabelString port;
+	portPtr++;
+	if (portPtr != tokens.end())
+		port = BabelString(portPtr->c_str());
 
 	if (username.empty())
 	ko();
@@ -248,8 +256,12 @@ void CommandLexer::join(BabelString &message, ServerSession *session)
 	sendAnswer(answer, session);
 	userToJoin->setStatus(User::Status::BUSY);
 	session->getUser()->setStatus(User::Status::BUSY);
-	broadcast(BabelString("LIST ") + session->getUser()->getName() + " Busy", session);
-	broadcast(BabelString("LIST ") + userToJoin->getName() + " Busy", session);
+
+	auto answerUserToJoin = BabelString("JOIN ") + session->getUser()->getName() + BabelString(" ") + port;
+	userToJoin->transmit(Message(answerUserToJoin, session));
+
+	broadcastAll(BabelString("LIST ") + session->getUser()->getName() + " Busy");
+	broadcastAll(BabelString("LIST ") + userToJoin->getName() + " Busy");
 }
 
 CommandLexer::Tokens CommandLexer::tokenize(std::string &toTokenize)
@@ -261,4 +273,9 @@ CommandLexer::Tokens CommandLexer::tokenize(std::string &toTokenize)
 void CommandLexer::broadcast(BabelString answer, ServerSession *session)
 {
 	_server.broadcast(answer, session);
+}
+
+void CommandLexer::broadcastAll(BabelString answer)
+{
+	_server.broadcast(answer);
 }
