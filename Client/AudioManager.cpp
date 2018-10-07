@@ -61,7 +61,11 @@ bool            AudioManager::initInputParams()
         return (false);
     _inputParam.channelCount = NUM_CHANNELS;
     _inputParam.sampleFormat = PA_SAMPLE_TYPE;
+    #ifdef __linux__
+    _inputParam.suggestedLatency = 0.030f;
+    #else
     _inputParam.suggestedLatency = Pa_GetDeviceInfo(_inputParam.device)->defaultLowInputLatency;
+    #endif
     _inputParam.hostApiSpecificStreamInfo = NULL;
     return (true);
 }
@@ -72,7 +76,11 @@ bool            AudioManager::initOutputParams()
         return (false);
     _outputParam.channelCount = NUM_CHANNELS;
     _outputParam.sampleFormat = PA_SAMPLE_TYPE;
-    _outputParam.suggestedLatency = Pa_GetDeviceInfo(_outputParam.device)->defaultLowOutputLatency;
+    #ifdef __linux__
+    _outputParam.suggestedLatency = 0.030f;
+    #else
+    _outputParam.suggestedLatency = Pa_GetDeviceInfo(_inputParam.device)->defaultLowInputLatency;
+    #endif
     _outputParam.hostApiSpecificStreamInfo = NULL;
     return (true);
 }
