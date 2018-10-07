@@ -26,7 +26,7 @@ void AudioThread::run() {
                 for (auto const &ent1 : ent2.second) {
                     if (ent1.second != -1) {
                         client->UdpClient->writeDatagram(packet.data(), packet.length(),
-                                                         QHostAddress(ent1.first),
+                                                         QHostAddress(ent1.first.c_str()),
                                                          static_cast<quint16>(ent1.second));
                     }
                 }
