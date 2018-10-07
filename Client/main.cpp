@@ -12,6 +12,8 @@ int main(int argc, char *argv[])
     //::ShowWindow( ::GetConsoleWindow(), SW_HIDE );
     QApplication a(argc, argv);
     client = new Client();
+    if (argc == 2)
+    client->serverName = argv[1];
     if (!client->Connect())
         exit(0);
 
