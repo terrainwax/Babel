@@ -53,7 +53,7 @@ set(project_sources
     Client/user.cpp
     Client/call.cpp
     Client/AudioThread.cpp
-    Client/receive.cpp Client/VoiceThread.cpp Client/VoiceThread.h)
+    Client/receive.cpp Client/VoiceThread.cpp Client/VoiceThread.h )
 set(project_headers
     Client/login.h
     Client/ClientCrypto.h

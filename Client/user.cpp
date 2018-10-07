@@ -18,7 +18,7 @@ if (status == std::string("Available"))
 {
     ui->label->setStyleSheet("QLabel { background-color : green; border-radius:20px;}");
 }else if (status == std::string("Busy")){
-    ui->label->setStyleSheet("QLabel { background-color : blue; border-radius:20px;}");
+    ui->label->setStyleSheet("QLabel { background-color : red; border-radius:20px;}");
 
 } else if (status == std::string("Offline")){
     ui->label->setStyleSheet("QLabel { background-color : black; border-radius:20px;}");

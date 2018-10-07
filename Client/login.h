@@ -28,6 +28,8 @@ private slots:
 
     void on_mute_clicked();
 
+    void on_deco_clicked();
+
 public slots:
     Q_SLOT void hideThisWidget();
 

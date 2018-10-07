@@ -50,8 +50,9 @@ public:
     EncodeManager *Emanager;
     QString serverName;
     quint16 serverPort;
-    std::string called;
-    int portcalled;
+    std::string userwaited;
+    std::map<std::string , std::map<std::string, int>> clientCall;
+    int Myport;
     bool muted = false;
     ClientCrypto _crypto;
     Packet _p;

@@ -27,7 +27,6 @@ Login::~Login()
 
 void Login::on_pushButton_clicked()
 {
-    std::cout << "clicked " << std::endl;
     ui->lineEdit->setDisabled(1);
     ui->lineEdit_2->setDisabled(1);
     std::string login;
@@ -35,6 +34,7 @@ void Login::on_pushButton_clicked()
     Command command = {0};
     command.magic = COMMAND_MAGIC;
     command.data.id = CommandIdentifier::LOGIN;
+    client->id = CommandIdentifier::LOGIN;
     std::memcpy((char *)command.data.data + sizeof(CommandIdentifier), login.c_str(), login.size());
     client->deliver(BabelString((char *)&command, sizeof(Command)), true);
 
@@ -44,6 +44,7 @@ void Login::on_pushButton_clicked()
 void Login::hideThisWidget()
 {
     ui->stackedWidget->setCurrentIndex(1);
+
 }
 
 void Login::on_caltest_clicked()
@@ -91,4 +92,35 @@ void Login::on_calltest_clicked()
 void Login::on_mute_clicked()
 {
     client->muted = !client->muted;
+}
+
+void Login::on_deco_clicked()
+{
+    ui->lineEdit->setDisabled(0);
+    ui->lineEdit_2->setDisabled(0);
+    ui->lineEdit->clear();
+    ui->lineEdit_2->clear();
+    Command command = {0};
+    command.magic = COMMAND_MAGIC;
+    command.data.id = CommandIdentifier::OFFLINE;
+    client->deliver(BabelString((char *)&command, sizeof(Command)), true);
+    ui->stackedWidget->setCurrentIndex(0);
+    QGraphicsOpacityEffect *eff = new QGraphicsOpacityEffect(this);
+    ui->label_5->setGraphicsEffect(eff);
+    ui->frame_3->setGraphicsEffect(eff);
+    QPropertyAnimation *a = new QPropertyAnimation(eff,"opacity");
+    a->setDuration(500);
+    a->setStartValue(0);
+    a->setEndValue(1);
+    a->setEasingCurve(QEasingCurve::OutBack);
+    a->start(QPropertyAnimation::DeleteWhenStopped);
+    if (client->TcpClient->state() == QAbstractSocket::ConnectedState)
+        client->TcpClient->disconnectFromHost();
+    client->_secured = false;
+    ClientCrypto crypto;
+    client->_crypto = crypto;
+    if (client->TcpClient->waitForDisconnected(60000)) {
+        if (!client->Connect())
+            exit(0);
+    }
 }

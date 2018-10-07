@@ -31,21 +31,37 @@ Client::Client()
     this->serverName = "babibel.paladium-pvp.fr";
     this->serverPort = 42069;
     this->audio->start();
+    connect(this->UdpClient, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
+    connect(this->UdpClient, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
     connect(this->TcpClient, SIGNAL(connected()),this, SLOT(connected()));
     connect(this->TcpClient, SIGNAL(disconnected()),this, SLOT(disconnected()));
     connect(this->TcpClient, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
     connect(this->TcpClient, SIGNAL(readyRead()),this, SLOT(readyRead()));
-    connect(this->UdpClient, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
-    connect(this->UdpClient, SIGNAL(bytesWritten(qint64)),this, SLOT(bytesWritten(qint64)));
-
 
 }
 
 
 void Client::processPendingDatagrams()
 {
-        this->UdpClient->readDatagram(this->_ad.data(), Packet::max_body_length + Packet::header_length);
+        QHostAddress ip;
+        quint16 port;
+        std::cout << "receive something" << std::endl;
+        this->UdpClient->readDatagram(this->_ad.data(), Packet::max_body_length + Packet::header_length, &ip, &port);
         if (this->_ad.decodeHeader()) {
+            bool conversionOK = false;
+            QHostAddress ip4Address(ip.toIPv4Address(&conversionOK));
+            QString ip4String;
+            if (conversionOK)
+            {
+                ip4String = ip4Address.toString();
+            }
+            for(std::pair<const std::string,std::map<std::string, int>> &ent2 : this->clientCall) {
+                std::map<std::string, int>::iterator i = ent2.second.find(ip4String.toStdString());
+                if (i == ent2.second.end())
+                {
+                    return;
+                }
+            }
             auto voice = (Voice *) this->_ad.body();
             if (voice->magic != VOICE_MAGIC)
                 return;
@@ -57,6 +73,7 @@ void Client::processPendingDatagrams()
 
 bool Client::Call(QString ip, int port)
 {
+    std::cout << "port bind = " << port << std::endl;
     this->UdpClient->bind(QHostAddress::Any, port);
     this->incall = true;
     this->audio->start();
@@ -194,9 +211,8 @@ void Client::CallResponse(char *str)
                                      std::istream_iterator<std::string>());
     if (results.at(0) == std::string("OK")) {
         std::string ip = results.at(1);
-        this->called = ip;
-        this->portcalled = 4242 * 2;
-        Call(ip.c_str(), 4242);
+        this->clientCall[this->userwaited][ip] = -1;
+        Call(ip.c_str(), this->Myport);
     }
 
 }
@@ -210,10 +226,11 @@ void Client::JoinResponse(char *str)
     if (results.at(0) == std::string("OK")) {
         std::string ip = results.at(1);
         std::string port = results.at(2);
-        this->called = ip;
-        this->portcalled = std::atoi(port.c_str());
-        Call(ip.c_str(), std::atoi(port.c_str()) * 2);
+        this->clientCall[this->userwaited][ip] = std::atoi(port.c_str());
+        //this->clientCall[] = std::atoi(port.c_str());
+        Call(ip.c_str(), this->Myport);
     }
+
 }
 
 void Client::deliver(const BabelString &message, bool command)
@@ -276,6 +293,20 @@ void Client::ParseDefault(char *str)
     {
         ui->widget_2->setHidden(false);
         ui->widget_2->setName(results.at(1));
+
+    }
+    else if (results.at(0) == std::string("JOIN"))
+    {
+        for (auto &ent1 : this->clientCall[results.at(1)])
+        {
+
+            ent1.second = std::atoi(results.at(2).c_str());
+        }
+    }
+    else if (results.at(0) == std::string("HANG"))
+    {
+        this->incall = false;
+        this->clientCall.clear();
     }
 
 }
@@ -283,7 +314,12 @@ void Client::ParseDefault(char *str)
 void Client::LoginResponse(char *str)
 {
     if (strcmp(str,"KO") == 0)
+    {
+        ui->lineEdit->setDisabled(0);
+        ui->lineEdit_2->setDisabled(0);
         return;
+    }
+
 
     ui->pseudo->setText(ui->lineEdit->text());
     if (ui->stackedWidget->currentIndex() == 0)
@@ -327,6 +363,8 @@ void Client::setUserStatus(std::string user, std::string status) {
             use->setStatus(status);
             return;
         }
+        else if (user == this->ui->pseudo->text().toStdString())
+            return;
     }
     QListWidgetItem *listWidgetItem = new QListWidgetItem(ui->listWidget);
     ui->listWidget->addItem (listWidgetItem);

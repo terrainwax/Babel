@@ -131,7 +131,7 @@ background:rgb(50, 50, 50)
          <string/>
         </property>
         <property name="maxLength">
-         <number>32767</number>
+         <number>16</number>
         </property>
         <property name="placeholderText">
          <string>Username</string>
@@ -386,7 +386,7 @@ background-color:rgba(38, 38, 38, 150)
         <x>10</x>
         <y>180</y>
         <width>221</width>
-        <height>531</height>
+        <height>481</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -432,16 +432,16 @@ color:rgb(255, 255, 255);
      <widget class="QLabel" name="status">
       <property name="geometry">
        <rect>
-        <x>70</x>
-        <y>20</y>
-        <width>100</width>
-        <height>100</height>
+        <x>149</x>
+        <y>99</y>
+        <width>20</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="styleSheet">
        <string notr="true">.QLabel{
 background-color:rgb(0, 255, 0);
-border-radius:50px;
+border-radius:10px;
 }</string>
       </property>
       <property name="text">
@@ -468,19 +468,61 @@ border-radius:50px;
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="mute">
+     <widget class="QLabel" name="label_9">
       <property name="geometry">
        <rect>
-        <x>420</x>
-        <y>440</y>
-        <width>93</width>
-        <height>28</height>
+        <x>70</x>
+        <y>20</y>
+        <width>100</width>
+        <height>100</height>
        </rect>
       </property>
+      <property name="styleSheet">
+       <string notr="true">.QLabel{
+border-radius:20px;
+}</string>
+      </property>
       <property name="text">
-       <string>mutetest</string>
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap resource="assets.qrc">:/Ressources/Images/if_User1_34247.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
       </property>
      </widget>
+     <widget class="QPushButton" name="deco">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>680</y>
+        <width>221</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">.QPushButton{
+background-color:rgb(103, 9, 9);
+color:rgb(255, 255, 255);
+}</string>
+      </property>
+      <property name="text">
+       <string>Déconnexion</string>
+      </property>
+     </widget>
+     <zorder>label_6</zorder>
+     <zorder>label</zorder>
+     <zorder>line</zorder>
+     <zorder>textEdit</zorder>
+     <zorder>label_8</zorder>
+     <zorder>listWidget</zorder>
+     <zorder>pseudo</zorder>
+     <zorder>widget</zorder>
+     <zorder>widget_2</zorder>
+     <zorder>label_9</zorder>
+     <zorder>status</zorder>
+     <zorder>deco</zorder>
     </widget>
    </widget>
   </widget>

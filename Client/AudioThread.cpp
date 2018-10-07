@@ -7,6 +7,7 @@
 #include "Voice.h"
 
 void AudioThread::run() {
+    std::cout << client->incall << " Amanager:" <<  client->Amanager->readFromStream() << std::endl;
     while(client->incall && client->Amanager->readFromStream()) {
         unsigned char *data = client->Amanager->getReadBuffer();
         unsigned char *encode = client->Emanager->encode(data, client->Amanager->getReadBufferSize());
@@ -21,8 +22,14 @@ void AudioThread::run() {
         std::memcpy(packet.body(), b.getData(), packet.bodyLength());
         packet.encodeHeader();
         auto voice = (Voice *) packet.body();
-        client->UdpClient->writeDatagram(packet.data() , packet.length(), QHostAddress("127.0.0.1"),
-                                         static_cast<quint16>(client->portcalled));
+        for(auto const &ent2 : client->clientCall) {
+            for(auto const &ent1 : ent2.second) {
+                if (ent1.second != -1) {
+                    client->UdpClient->writeDatagram(packet.data(), packet.length(), QHostAddress(ent1.first.c_str()),
+                                                     static_cast<quint16>(ent1.second));
+                }
+            }
+        }
     }
     std::cout << "call not started" << std::endl;
 }

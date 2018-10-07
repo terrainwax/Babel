@@ -72,7 +72,7 @@ bool            AudioManager::initOutputParams()
         return (false);
     _outputParam.channelCount = NUM_CHANNELS;
     _outputParam.sampleFormat = PA_SAMPLE_TYPE;
-    _outputParam.suggestedLatency = Pa_GetDeviceInfo(_outputParam.device)->defaultLowOutputLatency;
+    _outputParam.suggestedLatency = Pa_GetDeviceInfo(_outputParam.device)->defaultHighOutputLatency;
     _outputParam.hostApiSpecificStreamInfo = NULL;
     return (true);
 }
