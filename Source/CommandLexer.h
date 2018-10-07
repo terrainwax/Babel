@@ -30,6 +30,7 @@ private:
 
 	void sendAnswer(BabelString answer, ServerSession *session);
 	void broadcast(BabelString answer, ServerSession *session);
+	void broadcastAll(BabelString answer);
 	Tokens tokenize(std::string &toTokenize);
 
 	void login(BabelString &message, ServerSession *session);

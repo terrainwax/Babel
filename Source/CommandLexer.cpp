@@ -260,8 +260,8 @@ void CommandLexer::join(BabelString &message, ServerSession *session)
 	auto answerUserToJoin = BabelString("JOIN ") + session->getUser()->getName() + BabelString(" ") + port;
 	userToJoin->transmit(Message(answerUserToJoin, session));
 
-	broadcast(BabelString("LIST ") + session->getUser()->getName() + " Busy", session);
-	broadcast(BabelString("LIST ") + userToJoin->getName() + " Busy", session);
+	broadcastAll(BabelString("LIST ") + session->getUser()->getName() + " Busy");
+	broadcastAll(BabelString("LIST ") + userToJoin->getName() + " Busy");
 }
 
 CommandLexer::Tokens CommandLexer::tokenize(std::string &toTokenize)
@@ -273,4 +273,9 @@ CommandLexer::Tokens CommandLexer::tokenize(std::string &toTokenize)
 void CommandLexer::broadcast(BabelString answer, ServerSession *session)
 {
 	_server.broadcast(answer, session);
+}
+
+void CommandLexer::broadcastAll(BabelString answer)
+{
+	_server.broadcast(answer);
 }
