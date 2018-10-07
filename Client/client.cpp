@@ -311,6 +311,7 @@ void Client::ParseDefault(char *str)
         this->incall = false;
         this->clientCall.clear();
         this->UdpClient->close();
+        this->ui->widget_3->setHidden(true);
     }
 
 }
