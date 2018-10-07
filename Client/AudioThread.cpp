@@ -9,7 +9,7 @@
 void AudioThread::run() {
     std::cout << client->incall << " Amanager:" <<  client->Amanager->readFromStream() << std::endl;
     while(client->incall && client->Amanager->readFromStream()) {
-        //if (client->isCo) {
+        if (client->isCo) {
             unsigned char *data = client->Amanager->getReadBuffer();
             unsigned char *encode = client->Emanager->encode(data, client->Amanager->getReadBufferSize());
             Voice v;
@@ -32,7 +32,7 @@ void AudioThread::run() {
                     }
                 }
             }
-        //}
+        }
     }
     std::cout << "call not started" << std::endl;
 }

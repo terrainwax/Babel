@@ -30,6 +30,7 @@ void incall::on_endcall_clicked()
     Command c2 = {0};
     c2.magic = COMMAND_MAGIC;
     c2.data.id = CommandIdentifier::HANG;
+    std::memcpy((char *)c2.data.data + sizeof(CommandIdentifier), ui->pseudo->text().toStdString().c_str(), ui->pseudo->text().toStdString().size());
     client->deliver(BabelString((char *)&c2, sizeof(Command)));
     Command c3 = {0};
     c3.magic = COMMAND_MAGIC;

@@ -46,19 +46,30 @@ void Client::processPendingDatagrams()
         QHostAddress ip;
         quint16 port;
         std::cout << "receive something" << std::endl;
+    if (!this->isCo)
+    {
+        QByteArray data;
+        this->UdpClient->readDatagram(data.data(), 12, &ip, &port);
+        std::cout << data.toStdString() << std::endl;
+        if (data.toStdString() == std::string("HOLEPUNCHING")) {
+            this->isCo = true;
+            QByteArray send;
+            send.append("HOLEPUNCHING");
+            this->UdpClient->writeDatagram(send,ip, port);
+        }
+    }
+    else {
         this->UdpClient->readDatagram(this->_ad.data(), Packet::max_body_length + Packet::header_length, &ip, &port);
         if (this->_ad.decodeHeader()) {
             bool conversionOK = false;
             QHostAddress ip4Address(ip.toIPv4Address(&conversionOK));
             QString ip4String;
-            if (conversionOK)
-            {
+            if (conversionOK) {
                 ip4String = ip4Address.toString();
             }
-            for(std::pair<const std::string,std::map<std::string, int>> &ent2 : this->clientCall) {
+            for (std::pair<const std::string, std::map<std::string, int>> &ent2 : this->clientCall) {
                 std::map<std::string, int>::iterator i = ent2.second.find(ip4String.toStdString());
-                if (i == ent2.second.end())
-                {
+                if (i == ent2.second.end()) {
                     return;
                 }
             }
@@ -68,7 +79,7 @@ void Client::processPendingDatagrams()
             unsigned char *data = this->Emanager->decode(voice->data.data, voice->data.N_bytes);
             this->Amanager->writeOnStream(data);
         }
-
+    }
 }
 
 bool Client::Call(QString ip, int port)
@@ -142,65 +153,68 @@ void Client::ReadHeader()
 
 void Client::ReadBody()
 {
-    this->TcpClient->read(_p.body(), _p.bodyLength());
-    if (!_secured) {
-        if (_p.str().substr(0, 30) == "-----BEGIN RSA PUBLIC KEY-----") {
-            const BabelString RSAPublicKey = _p.str();
-            _crypto.setRemotePublicKey(RSAPublicKey);
 
-            std::cout << BabelString("Received RSA Public Key:\n") + _crypto.getRemotePublicKey() << std::endl;
+        this->TcpClient->read(_p.body(), _p.bodyLength());
+        if (!_secured) {
+            if (_p.str().substr(0, 30) == "-----BEGIN RSA PUBLIC KEY-----") {
+                const BabelString RSAPublicKey = _p.str();
+                _crypto.setRemotePublicKey(RSAPublicKey);
 
-            BabelString aesKey = _crypto.getAESKey();
+                std::cout << BabelString("Received RSA Public Key:\n") + _crypto.getRemotePublicKey() << std::endl;
 
-            std::cout << "Sending Encrypted AES Key: ";
+                BabelString aesKey = _crypto.getAESKey();
 
-            for (int i = 0; i < aesKey.getSize(); ++i)
-                std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesKey.getData()[i];
+                std::cout << "Sending Encrypted AES Key: ";
 
-            std::cout << std::endl;
+                for (int i = 0; i < aesKey.getSize(); ++i)
+                    std::cout << std::hex << std::setfill('0') << std::setw(2)
+                              << (unsigned int) (unsigned char) aesKey.getData()[i];
 
-            BabelString encryptedAESKey = _crypto.encryptRSA(aesKey);
+                std::cout << std::endl;
 
-            deliver(BabelString("ENCRYPTED AES KEY:") + encryptedAESKey);
+                BabelString encryptedAESKey = _crypto.encryptRSA(aesKey);
 
-            BabelString aesIv = _crypto.getAESIv();
+                deliver(BabelString("ENCRYPTED AES KEY:") + encryptedAESKey);
 
-            std::cout << "Sending Encrypted AES Iv: ";
+                BabelString aesIv = _crypto.getAESIv();
 
-            for (int i = 0; i < aesIv.getSize(); ++i)
-                std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)(unsigned char)aesIv.getData()[i];
+                std::cout << "Sending Encrypted AES Iv: ";
 
-            std::cout << std::endl;
+                for (int i = 0; i < aesIv.getSize(); ++i)
+                    std::cout << std::hex << std::setfill('0') << std::setw(2)
+                              << (unsigned int) (unsigned char) aesIv.getData()[i];
 
-            BabelString encryptedAESIv = _crypto.encryptRSA(aesIv);
+                std::cout << std::endl;
 
-            deliver(BabelString("ENCRYPTED AES IV:") + encryptedAESIv);
+                BabelString encryptedAESIv = _crypto.encryptRSA(aesIv);
 
-            std::cout << BabelString("ClientSession Secured: ") << std::endl;
+                deliver(BabelString("ENCRYPTED AES IV:") + encryptedAESIv);
 
-            _secured = true;
+                std::cout << BabelString("ClientSession Secured: ") << std::endl;
+
+                _secured = true;
+            }
+        } else {
+            BabelString decrypted = _crypto.decryptAES(_p.str());
+            switch (id) {
+                case CommandIdentifier::LOGIN :
+                    LoginResponse(decrypted.getData());
+                    id = -1;
+                    break;
+                case CommandIdentifier::CALL :
+                    CallResponse(decrypted.getData());
+                    id = -1;
+                    break;
+                case CommandIdentifier::JOIN :
+                    JoinResponse(decrypted.getData());
+                    id = -1;
+                    break;
+                default:
+                    ParseDefault(decrypted.getData());
+            }
+            std::cout << "Response :" << decrypted.getData() << std::endl;
         }
-    }
-    else {
-        BabelString decrypted = _crypto.decryptAES(_p.str());
-        switch (id) {
-            case CommandIdentifier::LOGIN :
-                LoginResponse(decrypted.getData());
-                id = -1;
-                break;
-            case CommandIdentifier::CALL :
-                CallResponse(decrypted.getData());
-                id = -1;
-                break;
-            case CommandIdentifier::JOIN :
-                JoinResponse(decrypted.getData());
-                id = -1;
-                break;
-            default:
-                ParseDefault(decrypted.getData());
-        }
-        std::cout << "Response :" << decrypted.getData() << std::endl;
-    }
+
 }
 void Client::CallResponse(char *str)
 {
@@ -213,6 +227,7 @@ void Client::CallResponse(char *str)
         std::string ip = results.at(1);
         this->clientCall[this->userwaited]["127.0.0.1"] = -1;
         Call(ip.c_str(), this->Myport);
+
     }
 
 }
@@ -227,10 +242,12 @@ void Client::JoinResponse(char *str)
         std::string ip = results.at(1);
         std::string port = results.at(2);
         this->clientCall[this->userwaited]["127.0.0.1"] = std::atoi(port.c_str());
-        //QByteArray send;
-        //send.append("HOLEPUNCHING");
-        //this->UdpClient->writeDatagram(send,QHostAddress(ip.c_str()), std::atoi(port.c_str()));
         Call(ip.c_str(), this->Myport);
+        if (!this->isCo) {
+            QByteArray send;
+            send.append("HOLEPUNCHING");
+            this->UdpClient->writeDatagram(send, QHostAddress(ip.c_str()), std::atoi(port.c_str()));
+        }
     }
 
 }
@@ -299,15 +316,25 @@ void Client::ParseDefault(char *str)
     }
     else if (results.at(0) == std::string("JOIN"))
     {
+        std::string ip;
+        int port;
         for (auto &ent1 : this->clientCall[results.at(1)])
         {
             ent1.second = std::atoi(results.at(2).c_str());
+            ip = ent1.first;
+            port = ent1.second;
+        }
+        if (!this->isCo) {
+            QByteArray send;
+            send.append("HOLEPUNCHING");
+            this->UdpClient->writeDatagram(send, QHostAddress(ip.c_str()), port);
         }
         this->ui->widget_3->setName(results.at(1));
         this->ui->widget_3->setHidden(false);
     }
     else if (results.at(0) == std::string("HANG"))
     {
+        //this->isCo = false;
         this->incall = false;
         this->clientCall.clear();
         this->UdpClient->close();

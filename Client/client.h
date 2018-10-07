@@ -56,7 +56,7 @@ public:
     bool muted = false;
     bool soundmuted = false;
     ClientCrypto _crypto;
-    bool isCo = false;
+    bool isCo = true;
     Packet _p;
     Packet _ad;
     PacketQueue _writeMessageQueue;
