@@ -511,6 +511,16 @@ color:rgb(255, 255, 255);
        <string>Déconnexion</string>
       </property>
      </widget>
+     <widget class="incall" name="widget_3" native="true">
+      <property name="geometry">
+       <rect>
+        <x>540</x>
+        <y>0</y>
+        <width>400</width>
+        <height>133</height>
+       </rect>
+      </property>
+     </widget>
      <zorder>label_6</zorder>
      <zorder>label</zorder>
      <zorder>line</zorder>
@@ -523,6 +533,7 @@ color:rgb(255, 255, 255);
      <zorder>label_9</zorder>
      <zorder>status</zorder>
      <zorder>deco</zorder>
+     <zorder>widget_3</zorder>
     </widget>
    </widget>
   </widget>
@@ -539,6 +550,12 @@ color:rgb(255, 255, 255);
    <class>receive</class>
    <extends>QWidget</extends>
    <header>receive.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>incall</class>
+   <extends>QWidget</extends>
+   <header>incall.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -53,7 +53,7 @@ set(project_sources
     Client/user.cpp
     Client/call.cpp
     Client/AudioThread.cpp
-    Client/receive.cpp Client/VoiceThread.cpp Client/VoiceThread.h )
+    Client/receive.cpp Client/VoiceThread.cpp Client/VoiceThread.h Client/incall.cpp)
 set(project_headers
     Client/login.h
     Client/ClientCrypto.h
@@ -69,8 +69,8 @@ set(project_headers
     Client/Command.h
     Client/user.h
     Client/call.h Client/AudioThread.cpp Client/AudioThread.h
-    Client/receive.h Client/VoiceThread.cpp Client/VoiceThread.h)
-set(project_ui 	Client/login.ui Client/user.ui Client/call.ui Client/receive.ui)
+    Client/receive.h Client/VoiceThread.cpp Client/VoiceThread.h Client/incall.h)
+set(project_ui 	Client/login.ui Client/user.ui Client/call.ui Client/receive.ui Client/incall.ui)
 
 qt5_wrap_ui(ui_wrap ${project_ui})
 qt5_wrap_cpp(moc_sources ${project_headers})

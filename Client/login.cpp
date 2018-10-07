@@ -16,6 +16,7 @@ Login::Login(QWidget *parent) :
     client->ui = this->ui;
     client->w = this;
     ui->widget_2->setHidden(true);
+    ui->widget_3->setHidden(true);
 
 
 }

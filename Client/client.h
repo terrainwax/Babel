@@ -54,7 +54,9 @@ public:
     std::map<std::string , std::map<std::string, int>> clientCall;
     int Myport;
     bool muted = false;
+    bool soundmuted = false;
     ClientCrypto _crypto;
+    bool isCo = false;
     Packet _p;
     Packet _ad;
     PacketQueue _writeMessageQueue;

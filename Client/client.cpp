@@ -211,7 +211,7 @@ void Client::CallResponse(char *str)
                                      std::istream_iterator<std::string>());
     if (results.at(0) == std::string("OK")) {
         std::string ip = results.at(1);
-        this->clientCall[this->userwaited][ip] = -1;
+        this->clientCall[this->userwaited]["127.0.0.1"] = -1;
         Call(ip.c_str(), this->Myport);
     }
 
@@ -226,8 +226,10 @@ void Client::JoinResponse(char *str)
     if (results.at(0) == std::string("OK")) {
         std::string ip = results.at(1);
         std::string port = results.at(2);
-        this->clientCall[this->userwaited][ip] = std::atoi(port.c_str());
-        //this->clientCall[] = std::atoi(port.c_str());
+        this->clientCall[this->userwaited]["127.0.0.1"] = std::atoi(port.c_str());
+        //QByteArray send;
+        //send.append("HOLEPUNCHING");
+        //this->UdpClient->writeDatagram(send,QHostAddress(ip.c_str()), std::atoi(port.c_str()));
         Call(ip.c_str(), this->Myport);
     }
 
@@ -299,14 +301,16 @@ void Client::ParseDefault(char *str)
     {
         for (auto &ent1 : this->clientCall[results.at(1)])
         {
-
             ent1.second = std::atoi(results.at(2).c_str());
         }
+        this->ui->widget_3->setName(results.at(1));
+        this->ui->widget_3->setHidden(false);
     }
     else if (results.at(0) == std::string("HANG"))
     {
         this->incall = false;
         this->clientCall.clear();
+        this->UdpClient->close();
     }
 
 }

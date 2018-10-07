@@ -36,6 +36,8 @@ void receive::on_join_clicked()
     std::memcpy((char *)c2.data.data + sizeof(CommandIdentifier), login.c_str(), login.size());
     client->deliver(BabelString((char *)&c2, sizeof(Command)));
     client->ui->widget_2->setHidden(true);
+    client->ui->widget_3->setName(ui->pseudo->text().toStdString());
+    client->ui->widget_3->setHidden(false);
 }
 
 void receive::on_hang_clicked()
