@@ -107,12 +107,23 @@ background-color:rgba(26, 26, 26, 150);
      <height>100</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">.QPushButton{
+background-color:rgba(255, 255, 255, 0)
+}</string>
+   </property>
    <property name="text">
     <string/>
    </property>
    <property name="icon">
     <iconset resource="assets.qrc">
      <normaloff>:/Ressources/Images/if_Phone_2744956.png</normaloff>:/Ressources/Images/if_Phone_2744956.png</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>100</width>
+     <height>100</height>
+    </size>
    </property>
   </widget>
   <zorder>label</zorder>

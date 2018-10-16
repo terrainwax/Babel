@@ -21,16 +21,18 @@ void AudioThread::run() {
             packet.bodyLength(b.getSize());
             std::memcpy(packet.body(), b.getData(), packet.bodyLength());
             packet.encodeHeader();
-            auto voice = (Voice *) packet.body();
-            for (auto const &ent2 : client->clientCall) {
-                for (auto const &ent1 : ent2.second) {
-                    if (ent1.second != -1) {
-                        client->UdpClient->writeDatagram(packet.data(), packet.length(),
-                                                         QHostAddress(ent1.first.c_str()),
-                                                         static_cast<quint16>(ent1.second));
+            if (!client->muted) {
+                for (auto const &ent2 : client->clientCall) {
+                    for (auto const &ent1 : ent2.second) {
+                        if (ent1.second != -1) {
+                            client->UdpClient->writeDatagram(packet.data(), packet.length(),
+                                                             QHostAddress(ent1.first.c_str()),
+                                                             static_cast<quint16>(ent1.second));
+                        }
                     }
                 }
             }
+            client->Amanager->cleanReadBuffer();
         }
     }
     std::cout << "call not started" << std::endl;

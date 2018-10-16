@@ -45,9 +45,10 @@ void Client::processPendingDatagrams()
 {
         QHostAddress ip;
         quint16 port;
-        std::cout << "receive something" << std::endl;
+        std::cout << "receive something1" << std::endl;
     if (!this->isCo)
     {
+
         QByteArray data;
         this->UdpClient->readDatagram(data.data(), 12, &ip, &port);
         std::cout << data.toStdString() << std::endl;
@@ -67,6 +68,7 @@ void Client::processPendingDatagrams()
             if (conversionOK) {
                 ip4String = ip4Address.toString();
             }
+
             for (std::pair<const std::string, std::map<std::string, int>> &ent2 : this->clientCall) {
                 std::map<std::string, int>::iterator i = ent2.second.find(ip4String.toStdString());
                 if (i == ent2.second.end()) {
@@ -77,7 +79,8 @@ void Client::processPendingDatagrams()
             if (voice->magic != VOICE_MAGIC)
                 return;
             unsigned char *data = this->Emanager->decode(voice->data.data, voice->data.N_bytes);
-            this->Amanager->writeOnStream(data);
+            if (!this->soundmuted)
+                this->Amanager->writeOnStream(data);
         }
     }
 }
@@ -300,7 +303,8 @@ void Client::deliver(const BabelString &message)
 
 void Client::ParseDefault(char *str)
 {
-
+    if (str == nullptr)
+        return;
     std::string text = std::string(str);
 
     std::istringstream iss(text);

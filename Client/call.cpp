@@ -28,7 +28,7 @@ void call::on_call_2_clicked()
         std::string login;
         std::srand(std::time(nullptr));
         int random_variable = std::rand();
-        client->Myport = ((random_variable + 49152)) % 65535;
+        client->Myport = 55344;
         login = ui->pseudo->text().toStdString() + std::string(" ") + std::to_string(client->Myport);
         client->userwaited = ui->pseudo->text().toStdString();
         Command command = {0};

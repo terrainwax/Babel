@@ -5,5 +5,9 @@
         <file>Ressources/Images/if_Phone_2744956.png</file>
         <file>Ressources/Images/if_036_phone_call_hang_1472932.png</file>
         <file>Ressources/Images/if_User1_34247.png</file>
+        <file>Ressources/Images/microphone.png</file>
+        <file>Ressources/Images/muted.png</file>
+        <file>Ressources/Images/speakermuted.png</file>
+        <file>Ressources/Images/speaker.png</file>
     </qresource>
 </RCC>

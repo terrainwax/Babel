@@ -42,9 +42,17 @@ void incall::on_endcall_clicked()
 void incall::on_mute_clicked()
 {
     client->muted = !client->muted;
+    if (client->muted)
+        this->ui->mute->setIcon(QIcon(":/Ressources/Images/muted.png"));
+    else
+        this->ui->mute->setIcon(QIcon(":/Ressources/Images/microphone.png"));
 }
 
 void incall::on_soundmute_clicked()
 {
     client->soundmuted = !client->soundmuted;
+    if (client->soundmuted)
+        this->ui->soundmute->setIcon(QIcon(":/Ressources/Images/speakermuted.png"));
+    else
+        this->ui->soundmute->setIcon(QIcon(":/Ressources/Images/speaker.png"));
 }
